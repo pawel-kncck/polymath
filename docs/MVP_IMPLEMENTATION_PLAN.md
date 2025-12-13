@@ -17,10 +17,10 @@ This document defines the Minimum Viable Product (MVP) for Polymath and provides
 ### Milestone 2: Student Quiz Flow
 | Order | Task | Description | Status |
 |-------|------|-------------|--------|
-| 5 | 2.2 | Server Actions for Modules | ⬚ Pending |
-| 6 | 3.3 | Quiz Runner + useQuiz Hook | ⬚ Pending |
-| 7 | 3.4 | TEXT Renderer Component | ⬚ Pending |
-| 8 | 3.6 | Quiz Page + Result Saving | ⬚ Pending |
+| 5 | 2.2 | Server Actions for Modules | ✅ Done |
+| 6 | 3.3 | Quiz Runner + useQuiz Hook | ✅ Done |
+| 7 | 3.4 | TEXT Renderer Component | ✅ Done |
+| 8 | 3.6 | Quiz Page + Result Saving | ✅ Done |
 
 ### 🚀 FIRST DEPLOY (after task 8)
 Student can log in, take quiz, see score. Seed via Prisma CLI.
@@ -54,7 +54,7 @@ Student can log in, take quiz, see score. Seed via Prisma CLI.
 | 6.4 | Environment Configuration | Document in README |
 | 6.5 | E2E Test Suite | Add after MVP stable |
 
-**Progress: 4/16 core tasks completed (25%) | First deploy after 8 tasks**
+**Progress: 8/16 core tasks completed (50%) | 🚀 READY FOR FIRST DEPLOY**
 
 ### Role-based Access Summary
 | Role | Capabilities |

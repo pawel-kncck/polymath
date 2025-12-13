@@ -4,6 +4,66 @@
 
 This document defines the Minimum Viable Product (MVP) for Polymath and provides a detailed, task-level implementation plan. The MVP focuses on delivering a functional English Plurals learning module with user authentication, quiz functionality, results tracking, and admin content management.
 
+## Progress Tracking (Fast Deploy Strategy)
+
+### Milestone 1: Foundation + Auth
+| Order | Task | Description | Status |
+|-------|------|-------------|--------|
+| 1 | 0.1 | Initialize Next.js Project | ✅ Done |
+| 2 | 0.3 | Setup Prisma & Database Schema | ✅ Done |
+| 3 | 1.1 | Configure Auth.js with Google OAuth | ⬚ Pending |
+| 4 | 1.3 | Route Protection + Role-based Redirects | ⬚ Pending |
+
+### Milestone 2: Student Quiz Flow
+| Order | Task | Description | Status |
+|-------|------|-------------|--------|
+| 5 | 2.2 | Server Actions for Modules | ⬚ Pending |
+| 6 | 3.3 | Quiz Runner + useQuiz Hook | ⬚ Pending |
+| 7 | 3.4 | TEXT Renderer Component | ⬚ Pending |
+| 8 | 3.6 | Quiz Page + Result Saving | ⬚ Pending |
+
+### 🚀 FIRST DEPLOY (after task 8)
+Student can log in, take quiz, see score. Seed via Prisma CLI.
+
+### Milestone 3: Parent-Child Interaction
+| Order | Task | Description | Status |
+|-------|------|-------------|--------|
+| 9 | 5.2 | JSON Seeder UI (Parent adds questions) | ⬚ Pending |
+| 10 | 4.1 | Results History (Parent views scores) | ⬚ Pending |
+| 11 | 3.1 | Layout + Role-aware Navigation | ⬚ Pending |
+| 12 | 3.2 | Module Selection UI | ⬚ Pending |
+
+### Milestone 4: Polish
+| Order | Task | Description | Status |
+|-------|------|-------------|--------|
+| 13 | 6.3 | Database Seeding Script | ⬚ Pending |
+| 14 | 5.1 | Admin Dashboard | ⬚ Pending |
+| 15 | 6.1 | Loading States & Error Boundaries | ⬚ Pending |
+| 16 | 6.2 | CSS Animations | ⬚ Pending |
+
+### Deferred (Add Later)
+| Task | Description | Reason |
+|------|-------------|--------|
+| 0.2 | Testing Infrastructure | Add after first deploy |
+| 1.2 | Custom Auth UI Components | Use Auth.js defaults |
+| 2.1 | Type Definitions | Inline types work initially |
+| 2.3 | Results Server Actions | Merged into 3.6 |
+| 2.4 | Admin Server Actions | Merged into 5.2 |
+| 4.2 | Result Detail View | Nice to have |
+| 5.3 | Module Management (delete) | Nice to have |
+| 6.4 | Environment Configuration | Document in README |
+| 6.5 | E2E Test Suite | Add after MVP stable |
+
+**Progress: 2/16 core tasks completed (12%) | First deploy after 8 tasks**
+
+### Role-based Access Summary
+| Role | Capabilities |
+|------|--------------|
+| **Student** | Take quizzes, see own results |
+| **Parent (Admin)** | Add questions via JSON seeder, view child's results |
+
+---
+
 ## MVP Scope
 
 ### Included
@@ -119,7 +179,7 @@ model Result {
 
 ### Phase 0: Project Initialization & Infrastructure
 
-#### Task 0.1: Initialize Next.js Project
+#### Task 0.1: Initialize Next.js Project ✅
 
 **Command:**
 
@@ -183,7 +243,7 @@ npx playwright install
 
 ---
 
-#### Task 0.3: Setup Prisma & Database Schema
+#### Task 0.3: Setup Prisma & Database Schema ✅
 
 **Dependencies:**
 
@@ -843,31 +903,42 @@ polymath/
 
 ---
 
-## Task Execution Order
+## Task Execution Order (Fast Deploy)
 
-1. Task 0.1 - Initialize Next.js
-2. Task 0.2 - Configure Testing
-3. Task 0.3 - Setup Prisma
-4. Task 1.1 - Configure Auth.js
-5. Task 1.2 - Auth UI Components
-6. Task 1.3 - Route Protection
-7. Task 2.1 - Type Definitions
-8. Task 2.2 - Module Server Actions
-9. Task 2.3 - Results Server Actions
-10. Task 3.1 - Layout Components
-11. Task 3.2 - Module Selection UI
-12. Task 3.3 - Quiz Runner
-13. Task 3.4 - TEXT Renderer
-14. Task 3.5 - Quiz Results Display
-15. Task 3.6 - Quiz Page Integration
-16. Task 4.1 - Results History
-17. Task 4.2 - Result Detail View
-18. Task 2.4 - Admin Server Actions
-19. Task 5.1 - Admin Dashboard
-20. Task 5.2 - JSON Seeder UI
-21. Task 5.3 - Module Management
-22. Task 6.1 - Loading States
-23. Task 6.2 - CSS Animations
-24. Task 6.3 - Database Seeding
-25. Task 6.4 - Environment Config
-26. Task 6.5 - E2E Test Suite
+### Milestone 1: Foundation + Auth
+1. ✅ Task 0.1 - Initialize Next.js
+2. ✅ Task 0.3 - Setup Prisma & Database Schema
+3. Task 1.1 - Configure Auth.js with Google OAuth
+4. Task 1.3 - Route Protection + Role-based Redirects
+
+### Milestone 2: Student Quiz Flow
+5. Task 2.2 - Server Actions for Modules
+6. Task 3.3 - Quiz Runner + useQuiz Hook
+7. Task 3.4 - TEXT Renderer Component
+8. Task 3.6 - Quiz Page + Result Saving
+
+### 🚀 FIRST DEPLOY HERE
+
+### Milestone 3: Parent-Child Interaction
+9. Task 5.2 - JSON Seeder UI (Parent adds questions)
+10. Task 4.1 - Results History (Parent views scores)
+11. Task 3.1 - Layout + Role-aware Navigation
+12. Task 3.2 - Module Selection UI
+
+### Milestone 4: Polish
+13. Task 6.3 - Database Seeding Script
+14. Task 5.1 - Admin Dashboard
+15. Task 6.1 - Loading States & Error Boundaries
+16. Task 6.2 - CSS Animations
+
+### Deferred
+- Task 0.2 - Testing Infrastructure
+- Task 1.2 - Custom Auth UI Components
+- Task 2.1 - Type Definitions
+- Task 2.3 - Results Server Actions (merged into 3.6)
+- Task 2.4 - Admin Server Actions (merged into 5.2)
+- Task 3.5 - Quiz Results Display (merged into 3.6)
+- Task 4.2 - Result Detail View
+- Task 5.3 - Module Management
+- Task 6.4 - Environment Config
+- Task 6.5 - E2E Test Suite

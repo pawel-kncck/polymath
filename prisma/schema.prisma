@@ -1,0 +1,65 @@
+// Prisma schema for Polymath learning platform
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// User model - supports both STUDENT and ADMIN roles
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  role      String   @default("STUDENT") // "ADMIN" or "STUDENT"
+  results   Result[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Module - container for quiz items (e.g., "English Plurals", "Algebra 1")
+model Module {
+  id          String   @id @default(uuid())
+  title       String
+  subject     String   // "LANGUAGE", "MATH", "LOGIC"
+  description String
+  items       Item[]
+  results     Result[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ItemType enum - determines which renderer to use
+enum ItemType {
+  TEXT      // Simple Q&A (vocabulary, translations)
+  MATH_EQ   // LaTeX formulas (algebra)
+  GEOMETRY  // SVG shapes
+}
+
+// Item - individual quiz question with flexible JSON content
+model Item {
+  id        String   @id @default(uuid())
+  moduleId  String
+  type      ItemType @default(TEXT)
+  content   Json     // Flexible payload based on ItemType
+  module    Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Result - tracks quiz performance for analytics
+model Result {
+  id        String   @id @default(uuid())
+  score     Int
+  total     Int
+  time      Int      // seconds
+  mistakes  Json     // array of mistake details
+  createdAt DateTime @default(now())
+  userId    String
+  moduleId  String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  module    Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+}

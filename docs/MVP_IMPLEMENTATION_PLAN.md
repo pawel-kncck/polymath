@@ -12,7 +12,7 @@ This document defines the Minimum Viable Product (MVP) for Polymath and provides
 | 1 | 0.1 | Initialize Next.js Project | ✅ Done |
 | 2 | 0.3 | Setup Prisma & Database Schema | ✅ Done |
 | 3 | 1.1 | Configure Auth.js with Google OAuth | ✅ Done |
-| 4 | 1.3 | Route Protection + Role-based Redirects | ⬚ Pending |
+| 4 | 1.3 | Route Protection + Role-based Redirects | ✅ Done |
 
 ### Milestone 2: Student Quiz Flow
 | Order | Task | Description | Status |
@@ -54,7 +54,7 @@ Student can log in, take quiz, see score. Seed via Prisma CLI.
 | 6.4 | Environment Configuration | Document in README |
 | 6.5 | E2E Test Suite | Add after MVP stable |
 
-**Progress: 3/16 core tasks completed (19%) | First deploy after 8 tasks**
+**Progress: 4/16 core tasks completed (25%) | First deploy after 8 tasks**
 
 ### Role-based Access Summary
 | Role | Capabilities |

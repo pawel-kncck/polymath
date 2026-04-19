@@ -1,21 +1,17 @@
 import type { NextAuthConfig } from 'next-auth';
-import Google from 'next-auth/providers/google';
 
 /**
- * Edge-safe Auth.js configuration. This file MUST NOT import Prisma or
- * anything that depends on Node built-ins — it's consumed by `middleware.ts`
+ * Edge-safe Auth.js configuration. This file MUST NOT import Prisma, bcrypt,
+ * or anything that depends on Node built-ins — it's consumed by `middleware.ts`
  * which runs in the Edge runtime.
  *
- * Full config with the Prisma adapter lives in `./auth.ts`.
+ * The Credentials provider (with its Node-only `authorize` callback) lives in
+ * `./auth.ts`. The middleware only decodes the JWT session cookie, so it does
+ * not need the full provider list here.
  */
 export const authConfig = {
   session: { strategy: 'jwt' },
-  providers: [
-    Google({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    }),
-  ],
+  providers: [],
   pages: {
     signIn: '/signin',
   },

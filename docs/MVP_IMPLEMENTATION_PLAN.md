@@ -86,13 +86,16 @@ Student can log in, take quiz, see score. Seed via Prisma CLI.
 
 ## Tech Stack
 
+> Original plan targeted Railway + Google OAuth. Current reality: Coolify on
+> Hetzner with email/password auth. See `CLAUDE.md` for the current stack.
+
 | Layer          | Technology                               |
 | -------------- | ---------------------------------------- |
-| Framework      | Next.js 14+ (App Router, Server Actions) |
+| Framework      | Next.js 16 (App Router, Server Actions)  |
 | Language       | TypeScript                               |
-| Database       | PostgreSQL (Railway)                     |
-| ORM            | Prisma                                   |
-| Authentication | Auth.js + Google OAuth                   |
+| Database       | PostgreSQL (Coolify on Hetzner)          |
+| ORM            | Prisma 7                                 |
+| Authentication | Auth.js v5 + Credentials (bcrypt)        |
 | Styling        | Tailwind CSS                             |
 | Unit Testing   | Vitest + React Testing Library           |
 | E2E Testing    | Playwright                               |
@@ -807,11 +810,15 @@ npm install -D ts-node
 
 ```bash
 DATABASE_URL="postgresql://..."
-NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="..."
-GOOGLE_CLIENT_ID="..."
-GOOGLE_CLIENT_SECRET="..."
+AUTH_URL="http://localhost:3000"
+AUTH_SECRET="..."
+ADMIN_EMAIL="..."
+ADMIN_PASSWORD="..."
 ```
+
+> **Note:** the app originally shipped with Google OAuth; it now uses an
+> email + password Credentials provider and admin-seeded accounts. See
+> `CLAUDE.md` for the current auth model.
 
 ---
 

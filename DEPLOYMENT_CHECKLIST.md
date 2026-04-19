@@ -1,197 +1,55 @@
 # Deployment Readiness Checklist
 
-Use this checklist to verify your Polymath app is ready for deployment.
+Use this checklist before pushing to `main` (every push to `main` is a production deploy via Coolify).
 
-## Database Setup
+## Local environment
 
-- [ ] PostgreSQL is running (local or Railway)
-- [ ] `.env` file has valid `DATABASE_URL`
-- [ ] Database schema migrated: `npm run db:push`
-- [ ] Database seeded with test data: `npm run db:seed`
-- [ ] Can view data in Prisma Studio: `npm run db:studio`
-- [ ] "English Plurals" module exists with 10 items
+- [ ] `.env` populated from `.env.example` with real values
+- [ ] `AUTH_SECRET` generated with `openssl rand -base64 32`
+- [ ] PostgreSQL running locally, `DATABASE_URL` points to it
+- [ ] Migrations applied: `npx prisma migrate dev`
+- [ ] Seed ran: `npm run db:seed` — admin user exists and can sign in
 
-## Environment Variables
+## Application health
 
-- [ ] `DATABASE_URL` - PostgreSQL connection string
-- [ ] `AUTH_SECRET` - Generated with `openssl rand -base64 32` (not placeholder)
-- [ ] `AUTH_URL` - Set to `http://localhost:3000` (dev) or production URL
-- [ ] `GOOGLE_CLIENT_ID` - From Google Cloud Console
-- [ ] `GOOGLE_CLIENT_SECRET` - From Google Cloud Console
+- [ ] `npm run build` succeeds
+- [ ] `npm run lint` clean
+- [ ] `npm test` — unit tests pass
+- [ ] `npm run test:e2e` — e2e tests pass
 
-### Google OAuth Setup
+## Docker image (catches 90% of deploy issues before they reach Coolify)
 
-- [ ] Created project in Google Cloud Console
-- [ ] Enabled Google+ API
-- [ ] Created OAuth 2.0 credentials
-- [ ] Added authorized redirect URI: `http://localhost:3000/api/auth/callback/google` (dev)
-- [ ] Added production redirect URI (if deploying)
+- [ ] `./deploy-test.sh --build-only` succeeds (requires Docker Desktop or OrbStack)
+- [ ] `prisma/migrations/` is committed (runtime `prisma migrate deploy` needs these files)
+- [ ] `public/.gitkeep` is committed (Docker `COPY` fails on missing directory)
 
-## Application Tests
+## Manual smoke (after deploy to `polymath.lr15a.pl`)
 
-- [ ] App starts without errors: `npm run dev`
-- [ ] No TypeScript errors: `npm run build`
-- [ ] No ESLint errors: `npm run lint`
+### Auth
 
-## Unit Tests
+- [ ] `/` shows Sign In link when logged out
+- [ ] Signing in with admin credentials succeeds and redirects home
+- [ ] Wrong password shows the red error banner, no runtime errors
+- [ ] Admin sees the "Admin" link in header; students don't
+- [ ] Visiting `/admin/users` as a student redirects to `/`
 
-Run `npm test` and verify:
+### Admin
 
-- [ ] All useQuiz hook tests pass (16 tests)
-- [ ] All modules action tests pass (9 tests)
-- [ ] All results action tests pass (10 tests)
-- [ ] All auth-utils tests pass (7 tests)
-- [ ] **Total: 42 unit tests passing**
+- [ ] `/admin/users` lists users
+- [ ] Creating a new user succeeds; new user can log in
+- [ ] Resetting a user's password works; the new password lets them log in
+- [ ] Deleting a user removes the row; self-delete is blocked
 
-## E2E Tests
+### Quiz flow
 
-Run `npm run test:e2e` and verify:
+- [ ] Home lists modules for the current locale
+- [ ] English Plurals module loads, progresses, and saves a Result
+- [ ] Mistakes appear in the results screen
 
-- [ ] Auth flow tests pass (3 tests)
-- [ ] Quiz UI tests pass (3 tests)
-- [ ] Manual test scenarios documented
+## Coolify-side (first deploy only)
 
-Note: Full quiz flow requires manual testing with real authentication.
-
-## Manual Testing (Critical Path)
-
-### Home Page
-- [ ] Navigate to `http://localhost:3000`
-- [ ] "English Plurals" module card displays
-- [ ] Module shows: title, description, subject badge, question count
-- [ ] Sign In button visible (when not authenticated)
-
-### Authentication
-- [ ] Click "Sign In" button
-- [ ] Redirects to sign in page
-- [ ] "Sign in with Google" button visible
-- [ ] Click "Sign in with Google"
-- [ ] Google OAuth flow completes successfully
-- [ ] Redirects back to home page
-- [ ] User name/email displays in header
-- [ ] Sign Out button visible
-
-### Quiz Flow
-- [ ] Click on "English Plurals" module
-- [ ] Quiz page loads with first question
-- [ ] Input field is auto-focused
-- [ ] Progress shows "1/10"
-- [ ] Type correct answer (e.g., "cats" for "cat")
-- [ ] Press Enter
-- [ ] Green flash animation appears
-- [ ] Automatically advances to question 2
-- [ ] Progress updates to "2/10"
-- [ ] Type incorrect answer
-- [ ] Red shake animation appears
-- [ ] Still advances to next question
-- [ ] Complete all 10 questions
-- [ ] Results screen appears
-
-### Results Display
-- [ ] Score shown as fraction (e.g., "8/10")
-- [ ] Percentage shown (e.g., "80%")
-- [ ] Time shown in MM:SS format
-- [ ] Mistakes listed with correct answers
-- [ ] "Try Again" button visible
-- [ ] "Choose Another Module" button visible
-
-### Retry Flow
-- [ ] Click "Try Again"
-- [ ] Quiz restarts from question 1
-- [ ] Can complete quiz again
-- [ ] New result displayed
-
-### Navigation
-- [ ] Click "Choose Another Module"
-- [ ] Returns to home page
-- [ ] Can select module again
-
-### Database Verification
-- [ ] Open Prisma Studio: `npm run db:studio`
-- [ ] Navigate to "Result" model
-- [ ] Verify result record created with:
-  - Correct userId
-  - Correct moduleId
-  - Correct score and total
-  - Time recorded
-  - Mistakes array populated
-  - createdAt timestamp
-
-## Code Quality
-
-- [ ] Build succeeds: `npm run build`
-- [ ] No console errors during manual testing
-- [ ] All dependencies installed
-- [ ] `.gitignore` includes `.env`, `node_modules`, `.next`
-
-## Railway Deployment (Production)
-
-### Railway Setup
-- [ ] Create Railway account
-- [ ] Create new project
-- [ ] Add PostgreSQL service
-- [ ] Copy `DATABASE_URL` from Railway to production environment
-
-### Environment Variables in Railway
-- [ ] `DATABASE_URL` - Auto-configured by Railway
-- [ ] `AUTH_SECRET` - Generated secure random string
-- [ ] `AUTH_URL` - Your Railway app URL (e.g., `https://polymath-production.up.railway.app`)
-- [ ] `GOOGLE_CLIENT_ID` - From Google Cloud Console
-- [ ] `GOOGLE_CLIENT_SECRET` - From Google Cloud Console
-
-### Google OAuth Production Setup
-- [ ] Add production redirect URI in Google Cloud Console:
-  - `https://your-railway-app.up.railway.app/api/auth/callback/google`
-
-### Railway Deployment
-- [ ] Connect GitHub repository to Railway
-- [ ] Railway auto-deploys on push
-- [ ] Build succeeds on Railway
-- [ ] Run migrations on Railway: `npx prisma db push`
-- [ ] Run seed on Railway: `npm run db:seed`
-
-### Production Verification
-- [ ] Visit production URL
-- [ ] Home page loads
-- [ ] Can sign in with Google
-- [ ] Can complete quiz
-- [ ] Results save to production database
-
-## Final Checks
-
-- [ ] All automated tests pass
-- [ ] Manual testing complete
-- [ ] Database has seed data
-- [ ] Authentication works
-- [ ] Quiz flow works end-to-end
-- [ ] Results save correctly
-- [ ] Ready for deployment! 🚀
-
-## Troubleshooting
-
-### Common Issues
-
-**Database connection fails:**
-- Verify `DATABASE_URL` is correct
-- Check PostgreSQL is running
-- Try connecting with `npx prisma studio`
-
-**OAuth not working:**
-- Verify Google credentials in `.env`
-- Check redirect URI matches in Google Console
-- Ensure `AUTH_URL` is correct
-
-**Build fails:**
-- Run `npm install` to ensure all dependencies installed
-- Check for TypeScript errors: `npm run build`
-- Clear `.next` folder and rebuild
-
-**Tests fail:**
-- Ensure database is seeded
-- Check all mocks are properly configured
-- Run tests individually to isolate failures
-
-**Animations not working:**
-- Verify Tailwind CSS is configured
-- Check `globals.css` has animations
-- Clear cache and reload browser
+- [ ] App created in Coolify, linked to GitHub repo, Build Pack = Docker
+- [ ] Domain `polymath.lr15a.pl` set, SSL issued
+- [ ] Env vars set: `DATABASE_URL`, `AUTH_URL`, `AUTH_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`
+- [ ] First deploy completed — startup ran `prisma migrate deploy` without errors
+- [ ] `npm run db:seed` executed once (via Coolify exec) to bootstrap the admin

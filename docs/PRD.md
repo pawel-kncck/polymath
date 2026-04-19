@@ -4,14 +4,19 @@
 
 **Polymath** is a subject-agnostic educational web application designed for home-learning. It facilitates rapid-fire practice drills across different domains (Language, Mathematics, Logic). The system features a generic "Quiz Runner" that dynamically adapts its interface based on the type of content (Text, Formula, or Geometric Shape) served from the database.
 
-## 2\. Technical Stack (Railway Optimized)
+## 2\. Technical Stack
 
-- **Framework:** **Next.js 14+** (App Router). Handles Frontend, API, and Server Actions.
-- **Database:** **PostgreSQL** (Hosted on Railway).
-- **ORM:** **Prisma**. Uses strongly typed schemas with `JSON` support for flexible content payloads.
-- **Authentication:** **Auth.js (NextAuth)**. Google OAuth provider.
+> The stack below reflects the current implementation. Earlier drafts of this
+> PRD targeted Railway with Google OAuth; both were swapped for a self-hosted
+> Coolify deploy with email/password auth. See `CLAUDE.md` for the source of
+> truth.
+
+- **Framework:** **Next.js 16** (App Router). Handles Frontend, API, and Server Actions.
+- **Database:** **PostgreSQL** (managed by Coolify on the lr15a platform).
+- **ORM:** **Prisma 7**. Uses strongly typed schemas with `JSON` support for flexible content payloads.
+- **Authentication:** **Auth.js v5** with a Credentials provider (email + bcrypt). Admin-managed accounts, no public signup.
 - **Math Rendering:** **KaTeX**. For rendering LaTeX equations (e.g., $\frac{x}{2} + 5$).
-- **Deployment:** **Railway**. Zero-config deployment from GitHub.
+- **Deployment:** **Coolify on Hetzner** (lr15a platform). Push-to-deploy from GitHub.
 
 ---
 
@@ -159,13 +164,17 @@ To ensure the app "scales" to new subjects, we define strict JSON structures for
 
 ---
 
-## 7\. Deployment Plan (Railway)
+## 7\. Deployment Plan (Coolify on lr15a)
+
+> Originally planned for Railway with Google OAuth; moved to self-hosted
+> Coolify with email/password auth. See `CLAUDE.md` and the lr15a platform
+> docs for the current setup.
 
 ### Phase 1: Setup
 
 1.  **Repo:** Create `polymath` on GitHub.
-2.  **Railway:** New Project $\rightarrow$ Provision PostgreSQL.
-3.  **Env:** Set `DATABASE_URL`, `NEXTAUTH_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`.
+2.  **Database:** `ssh` to the lr15a server and run `./server/create-app-db.sh polymath <postgres-container>` to provision an isolated DB + user.
+3.  **Env (Coolify dashboard):** Set `DATABASE_URL`, `AUTH_URL`, `AUTH_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`.
 
 ### Phase 2: The Logic (MVP)
 

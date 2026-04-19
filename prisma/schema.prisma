@@ -19,6 +19,7 @@ model User {
   emailVerified DateTime?
   name          String?
   image         String?
+  passwordHash  String?
   role          String    @default("STUDENT") // "ADMIN" or "STUDENT"
   accounts      Account[]
   sessions      Session[]

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { auth, signIn, signOut } from '@/lib/auth';
+import { auth, signOut } from '@/lib/auth';
 import { getModules } from '@/actions/modules';
 import { getLocale, getMessages } from '@/i18n/server';
 import { format, questionCount } from '@/i18n/format';
@@ -27,6 +27,14 @@ export default async function HomePage() {
 
             {session?.user ? (
               <div className="flex items-center gap-4">
+                {session.user.role === 'ADMIN' && (
+                  <Link
+                    href="/admin/users"
+                    className="text-sm font-medium text-blue-600 hover:underline dark:text-blue-400"
+                  >
+                    {t.common.admin}
+                  </Link>
+                )}
                 <span className="text-sm text-gray-600 dark:text-gray-400">
                   {session.user.name || session.user.email}
                 </span>
@@ -45,19 +53,12 @@ export default async function HomePage() {
                 </form>
               </div>
             ) : (
-              <form
-                action={async () => {
-                  'use server';
-                  await signIn('google', { redirectTo: '/' });
-                }}
+              <Link
+                href="/signin"
+                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
               >
-                <button
-                  type="submit"
-                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
-                >
-                  {t.common.signIn}
-                </button>
-              </form>
+                {t.common.signIn}
+              </Link>
             )}
           </div>
         </div>

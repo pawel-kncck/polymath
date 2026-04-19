@@ -6,21 +6,22 @@ Built originally to teach English Plurals to B1 students, it utilizes a flexible
 
 ## ✨ Features
 
-- **Google OAuth Authentication** - Secure sign-in with Google accounts
-- **Interactive Quizzes** - English Plurals module with 10 practice questions
-- **Real-time Feedback** - Green flash for correct, red shake for incorrect answers
-- **Progress Tracking** - See your score, time, and review mistakes
-- **Responsive Design** - Works on desktop and mobile devices
-- **Dark Mode Support** - Automatic theme switching
-- **Full Test Coverage** - 42 unit tests + E2E tests with Playwright
+- **Email + Password Authentication** — admin-managed accounts, no OAuth
+- **Admin panel** — create users, reset passwords, delete accounts at `/admin/users`
+- **Interactive Quizzes** — English Plurals module with 10 practice questions
+- **Real-time Feedback** — Green flash for correct, red shake for incorrect answers
+- **Progress Tracking** — See your score, time, and review mistakes
+- **Responsive Design** — Works on desktop and mobile devices
+- **Dark Mode Support** — Automatic theme switching
+- **Bilingual UI** — Polish / English with locale-aware content
 
 ## 🚀 Tech Stack
 
 - **Framework:** [Next.js 16](https://nextjs.org/) (App Router, Server Actions)
 - **Language:** TypeScript
-- **Database:** PostgreSQL (Hosted on [Railway](https://railway.app/))
-- **ORM:** [Prisma](https://www.prisma.io/)
-- **Auth:** [Auth.js v5](https://authjs.dev/) (Google Provider)
+- **Database:** PostgreSQL (managed by Coolify on the lr15a platform in production)
+- **ORM:** [Prisma 7](https://www.prisma.io/)
+- **Auth:** [Auth.js v5](https://authjs.dev/) with a Credentials provider (bcrypt)
 - **Styling:** Tailwind CSS v4
 - **Testing:** Vitest (unit) + Playwright (E2E)
 - **Math Rendering:** KaTeX (for LaTeX equations)
@@ -37,9 +38,10 @@ We use a `JSON` column to store the content payload, defined by an `ItemType`.
 
 ```prisma
 enum ItemType {
-  TEXT      // Simple Q&A (e.g., Vocabulary)
-  MATH_EQ   // LaTeX Formulas (e.g., Algebra)
-  GEOMETRY  // SVG Shapes (e.g., Geometry)
+  TEXT           // Simple Q&A (e.g., Vocabulary)
+  SINGLE_CHOICE  // One correct option from a list
+  MATH_EQ        // LaTeX Formulas (e.g., Algebra)
+  GEOMETRY       // SVG Shapes (e.g., Geometry)
 }
 
 model Item {
@@ -54,11 +56,12 @@ model Item {
 
 The frontend `QuizRunner` component switches its rendering logic based on the `type`.
 
-| Type         | Description               | JSON Structure Example                                                  |
-| :----------- | :------------------------ | :---------------------------------------------------------------------- |
-| **TEXT**     | Standard string matching. | `{"prompt": "Mouse", "answer": "Mice", "hint": "pol: Mysz"}`            |
-| **MATH_EQ**  | Renders LaTeX via KaTeX.  | `{"latex": "2x + 4 = 12", "instruction": "Solve for x", "answer": "4"}` |
-| **GEOMETRY** | Renders SVG shapes.       | `{"shape": "rect", "props": {"w": 10, "h": 5}, "answer": "50"}`         |
+| Type              | Description                    | JSON Structure Example                                                  |
+| :---------------- | :----------------------------- | :---------------------------------------------------------------------- |
+| **TEXT**          | Standard string matching.      | `{"prompt": "Mouse", "answer": "Mice", "hint": "pl: Mysz"}`             |
+| **SINGLE_CHOICE** | One correct option from a list | `{"prompt": "...", "options": [...], "answer": "..."}`                  |
+| **MATH_EQ**       | Renders LaTeX via KaTeX.       | `{"latex": "2x + 4 = 12", "instruction": "Solve for x", "answer": "4"}` |
+| **GEOMETRY**      | Renders SVG shapes.            | `{"shape": "rect", "props": {"w": 10, "h": 5}, "answer": "50"}`         |
 
 ---
 
@@ -66,9 +69,8 @@ The frontend `QuizRunner` component switches its rendering logic based on the `t
 
 ### Prerequisites
 
-- Node.js 20+ installed
-- PostgreSQL database (local or Railway)
-- Google OAuth credentials
+- Node.js 24+ installed
+- PostgreSQL running locally
 
 ### 1. Clone & Install
 
@@ -80,70 +82,56 @@ npm install
 
 ### 2. Database Setup
 
-**Option A: Local PostgreSQL**
-
 ```bash
 # Install PostgreSQL (macOS)
-brew install postgresql@15
-brew services start postgresql@15
+brew install postgresql@16
+brew services start postgresql@16
 
 # Create database
-createdb polymath
+createdb polymath_dev
 ```
-
-**Option B: Railway (Cloud - Recommended)**
-
-1. Go to [railway.app](https://railway.app)
-2. Create new project → Add PostgreSQL
-3. Copy the `DATABASE_URL` from Railway dashboard
 
 ### 3. Environment Variables
 
-Create a `.env` file in the root directory:
+Copy `.env.example` to `.env` and fill in the values:
 
 ```bash
-# Database (Local or Railway)
-DATABASE_URL="postgresql://postgres@localhost:5432/polymath"
+# PostgreSQL connection string
+DATABASE_URL="postgresql://postgres@localhost:5432/polymath_dev"
 
-# Auth.js (Generate secret: openssl rand -base64 32)
-AUTH_SECRET="your-random-secret-string"
+# Auth.js v5 — full URL of the deployed app (no trailing slash)
 AUTH_URL="http://localhost:3000"
 
-# Google OAuth (from Google Cloud Console)
-GOOGLE_CLIENT_ID="your-google-client-id"
-GOOGLE_CLIENT_SECRET="your-google-client-secret"
+# Generate with: openssl rand -base64 32
+AUTH_SECRET="your-random-secret-string"
+
+# Admin bootstrapped by `npm run db:seed` (idempotent upsert)
+ADMIN_EMAIL="admin@example.com"
+ADMIN_PASSWORD="at-least-8-characters"
 ```
 
-### 4. Google OAuth Setup
-
-1. Go to [Google Cloud Console](https://console.cloud.google.com)
-2. Create a new project or select existing
-3. Enable Google+ API
-4. Go to Credentials → Create OAuth 2.0 Client ID
-5. Add authorized redirect URI:
-   - `http://localhost:3000/api/auth/callback/google`
-6. Copy Client ID and Client Secret to `.env`
-
-### 5. Initialize Database
+### 4. Initialize Database
 
 ```bash
-# Apply schema to database
-npm run db:push
+# Apply migrations
+npx prisma migrate dev
 
-# Seed with English Plurals module (10 questions)
+# Seed modules + bootstrap the admin user
 npm run db:seed
 
 # (Optional) View data in Prisma Studio
 npm run db:studio
 ```
 
-### 6. Run Development Server
+### 5. Run Development Server
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to see the app.
+Open [http://localhost:3000](http://localhost:3000) and sign in with the admin credentials you set in `.env`.
+
+Additional users are created from `/admin/users` (admin-only).
 
 ---
 
@@ -156,8 +144,8 @@ Open [http://localhost:3000](http://localhost:3000) to see the app.
 - `npm run lint` - Run ESLint
 
 ### Database
-- `npm run db:push` - Apply Prisma schema to database
-- `npm run db:seed` - Seed database with test data
+- `npx prisma migrate dev` - Create and apply a new migration
+- `npm run db:seed` - Seed modules + bootstrap admin from env vars
 - `npm run db:reset` - Reset and reseed database (⚠️ destructive)
 - `npm run db:studio` - Open Prisma Studio GUI
 
@@ -173,32 +161,19 @@ Open [http://localhost:3000](http://localhost:3000) to see the app.
 
 Polymath has comprehensive test coverage with both unit and end-to-end tests.
 
-### Unit Tests (42 tests)
+### Unit Tests
 
-Run all unit tests:
 ```bash
 npm test
 ```
 
-Test suites:
-- `src/hooks/useQuiz.test.ts` - 16 tests (Quiz state management, answer validation, timing)
-- `src/actions/modules.test.ts` - 9 tests (Module fetching, shuffling)
-- `src/actions/results.test.ts` - 10 tests (Result saving, user isolation)
-- `src/lib/auth-utils.test.ts` - 7 tests (Authentication helpers)
+Test suites cover the quiz state hook, server actions for modules and results, and auth helpers.
 
 ### E2E Tests
 
-Run end-to-end tests:
 ```bash
 npm run test:e2e
 ```
-
-Test suites:
-- `e2e/auth.spec.ts` - Authentication flow
-- `e2e/quiz.spec.ts` - Quiz taking flow
-- `e2e/results.spec.ts` - Results verification
-
-**Note:** Full authenticated quiz flow requires manual testing due to Google OAuth. See `DEPLOYMENT_CHECKLIST.md` for manual testing steps.
 
 ---
 
@@ -207,80 +182,49 @@ Test suites:
 ```
 polymath/
 ├── prisma/
-│   ├── schema.prisma       # Database schema
-│   └── seed.ts             # Seed data (English Plurals)
+│   ├── schema.prisma             # Database schema
+│   ├── migrations/               # Committed migration history
+│   └── seed.ts                   # Modules + admin bootstrap
 ├── src/
-│   ├── app/                # Next.js App Router pages
-│   │   ├── page.tsx        # Home page (module listing)
-│   │   ├── signin/         # Sign in page
-│   │   └── quiz/[moduleId]/ # Quiz page
-│   ├── actions/            # Server actions
-│   │   ├── modules.ts      # Module CRUD
-│   │   └── results.ts      # Result CRUD
-│   ├── components/         # React components
-│   │   ├── quiz/           # Quiz UI components
-│   │   └── renderers/      # Content type renderers
-│   ├── hooks/              # Custom React hooks
-│   │   └── useQuiz.ts      # Quiz state management
-│   ├── lib/                # Utilities
-│   │   ├── auth.ts         # Auth.js configuration
-│   │   ├── auth-utils.ts   # Auth helpers
-│   │   └── db.ts           # Prisma client
-│   └── types/              # TypeScript types
-├── e2e/                    # Playwright E2E tests
-├── vitest.config.ts        # Vitest configuration
-├── playwright.config.ts    # Playwright configuration
-├── DEPLOYMENT_CHECKLIST.md # Deployment verification
-└── CLAUDE.md               # AI assistant instructions
+│   ├── app/
+│   │   ├── page.tsx              # Home (module listing)
+│   │   ├── signin/               # Email + password login
+│   │   ├── admin/users/          # Admin user management
+│   │   └── quiz/[moduleId]/      # Quiz flow
+│   ├── actions/                  # Server actions
+│   ├── components/
+│   │   ├── quiz/                 # Quiz UI components
+│   │   └── renderers/            # Content type renderers
+│   ├── hooks/useQuiz.ts          # Quiz state management
+│   ├── i18n/                     # PL / EN messages
+│   ├── lib/
+│   │   ├── auth.ts               # Auth.js + Credentials provider
+│   │   ├── auth.config.ts        # Edge-safe config for middleware
+│   │   ├── auth-utils.ts         # requireAuth / requireAdmin
+│   │   └── db.ts                 # Prisma client
+│   └── middleware.ts             # Route protection + admin guard
+├── e2e/                          # Playwright E2E tests
+├── Dockerfile                    # Next.js + Prisma 7 production image
+├── deploy-test.sh                # Local Docker build/run test
+├── DEPLOYMENT_CHECKLIST.md       # Pre-deploy verification
+└── CLAUDE.md                     # AI assistant instructions
 ```
 
 ---
 
 ## 🚢 Deployment
 
-### Deploy to Railway
+This app deploys to the lr15a.pl platform via Coolify (Hetzner). Pushing to `main` triggers an automatic production deploy — there is no staging.
 
-1. **Create Railway Project**
-   ```bash
-   # Install Railway CLI (optional)
-   npm install -g @railway/cli
+See [`CLAUDE.md`](./CLAUDE.md) for the deployment rules and [`DEPLOYMENT_CHECKLIST.md`](./DEPLOYMENT_CHECKLIST.md) for the pre-push checklist.
 
-   # Or use web dashboard
-   ```
+### Quick reference
 
-2. **Add PostgreSQL**
-   - In Railway dashboard, add PostgreSQL service
-   - `DATABASE_URL` is auto-configured
-
-3. **Connect GitHub Repository**
-   - Push your code to GitHub
-   - In Railway, deploy from GitHub repo
-   - Railway auto-deploys on push
-
-4. **Set Environment Variables**
-
-   In Railway dashboard, add:
-   ```
-   AUTH_SECRET=<generate-with-openssl-rand-base64-32>
-   AUTH_URL=https://your-app.up.railway.app
-   GOOGLE_CLIENT_ID=<your-client-id>
-   GOOGLE_CLIENT_SECRET=<your-client-secret>
-   ```
-
-5. **Update Google OAuth**
-   - Add production redirect URI in Google Cloud Console:
-     `https://your-app.up.railway.app/api/auth/callback/google`
-
-6. **Run Database Migrations**
-   ```bash
-   # Via Railway CLI or dashboard
-   railway run npm run db:push
-   railway run npm run db:seed
-   ```
-
-7. **Verify Deployment**
-
-   Use the [DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md) to verify everything works.
+1. Create the database on the server: `./server/create-app-db.sh polymath <postgres-container>`
+2. Add the app in the Coolify dashboard, Build Pack = Docker, domain = `polymath.lr15a.pl`
+3. Set env vars in Coolify: `DATABASE_URL`, `AUTH_URL`, `AUTH_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`
+4. Deploy — startup runs `prisma migrate deploy` automatically
+5. First time only: run `npm run db:seed` via Coolify exec to create the admin user
 
 ---
 
@@ -300,63 +244,47 @@ polymath/
 ```bash
 # Make changes to prisma/schema.prisma
 
-# Apply changes
-npm run db:push
+# Create and apply a new migration (commit the generated files)
+npx prisma migrate dev --name <description>
 
-# Generate Prisma client
-npx prisma generate
+# Prisma client is regenerated automatically
 ```
 
 ---
 
 ## 🐛 Troubleshooting
 
-### Database Connection Issues
+### Database connection issues
 - Verify `DATABASE_URL` in `.env`
 - Check PostgreSQL is running: `brew services list`
-- Test connection: `npm run db:studio`
+- Test with Prisma Studio: `npm run db:studio`
 
-### OAuth Not Working
-- Verify credentials in `.env`
-- Check redirect URI matches in Google Console
-- Ensure `AUTH_URL` is correct for your environment
+### Can't sign in
+- Make sure `npm run db:seed` ran and the admin user exists
+- Verify the password in `.env` matches what you're typing
+- Reset by editing `.env` and re-running `npm run db:seed` (upsert is idempotent)
 
-### Build Errors
+### Build errors
 - Clear `.next` folder: `rm -rf .next`
 - Reinstall dependencies: `rm -rf node_modules && npm install`
-- Check TypeScript errors: `npm run build`
 
-### Tests Failing
-- Ensure database is seeded: `npm run db:seed`
-- Check all mocks are properly configured
-- Run tests individually to isolate issues
+### Tests failing
+- Ensure database is migrated and seeded
+- Run suites individually to isolate issues
 
 ---
 
 ## 🗺️ Roadmap
 
 - [x] **Phase 1 (MVP):** English Plurals Module (Text Renderer)
-- [x] **Testing:** Full unit and E2E test coverage
+- [x] **Auth + admin:** email/password + user management UI
 - [ ] **Phase 2:** Math Module (KaTeX Integration)
 - [ ] **Phase 3:** Analytics Dashboard for Admin/Parent
 - [ ] **Phase 4:** Geometry Module (SVG Renderer)
-- [ ] **Phase 5:** "Mistake Repeater" mode (Train only on failed items)
+- [ ] **Phase 5:** "Mistake Repeater" mode (train only on failed items)
 
 ---
 
 ## 📝 License
 
 This project is for personal educational use.
-
----
-
-## 🙏 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Write tests for new functionality
-5. Ensure all tests pass: `npm test && npm run test:e2e`
-6. Submit a pull request
-
-For issues and questions, please open an issue on GitHub.

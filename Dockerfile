@@ -23,6 +23,12 @@ FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+# Generate the Prisma client into src/generated/prisma (per schema.prisma
+# generator config). This directory is gitignored, so Coolify's fresh
+# clone doesn't have it and next build would fail without this step.
+# prisma.config.ts calls env("DATABASE_URL") and throws if unset, so pass
+# a dummy URL — the generated client reads the real URL at runtime.
+RUN DATABASE_URL="postgresql://build:build@localhost:5432/build" npx prisma generate
 RUN npm run build
 
 # --- Production ---

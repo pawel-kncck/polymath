@@ -1,66 +1,50 @@
 'use server';
 
-import { prisma } from '@/lib/db';
+import { getAllContentModules, getContentModule } from '@/content';
 import { getLocale } from '@/i18n/server';
 
 /**
- * Get all modules for the current locale, with item counts.
- * Filters by the `languages` array so EN-only modules hide in PL mode and
- * vice versa.
+ * Modules and items are stored in the repo under `src/content/` (knowledge
+ * base / question bank), not in the database. These helpers read from the
+ * static content loader and return the same shape the UI already consumes.
  */
+
 export async function getModules() {
   const locale = await getLocale();
-  const modules = await prisma.module.findMany({
-    where: { languages: { has: locale } },
-    include: {
-      _count: {
-        select: { items: true },
-      },
-    },
-    orderBy: {
-      createdAt: 'desc',
-    },
-  });
-
-  return modules;
+  return getAllContentModules()
+    .filter((m) => m.languages.includes(locale))
+    .map((m) => ({
+      id: m.id,
+      title: m.title,
+      description: m.description,
+      subject: m.subject,
+      languages: m.languages,
+      _count: { items: m.items.length },
+    }));
 }
 
 export async function getModuleById(id: string) {
-  const module = await prisma.module.findUnique({
-    where: { id },
-    include: {
-      items: true,
-    },
-  });
-
-  return module;
+  return getContentModule(id);
 }
 
 /**
- * Get a module with a random selection of items for quiz.
+ * Return a module with a randomly ordered (optionally truncated) item list.
  */
-export async function getModuleWithRandomItems(moduleId: string, count?: number) {
-  const module = await prisma.module.findUnique({
-    where: { id: moduleId },
-    include: {
-      items: true,
-    },
-  });
+export async function getModuleWithRandomItems(
+  moduleId: string,
+  count?: number
+) {
+  const m = getContentModule(moduleId);
+  if (!m) return null;
 
-  if (!module) {
-    return null;
-  }
-
-  const shuffledItems = [...module.items];
-  for (let i = shuffledItems.length - 1; i > 0; i--) {
+  const shuffled = [...m.items];
+  for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [shuffledItems[i], shuffledItems[j]] = [shuffledItems[j], shuffledItems[i]];
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
-
-  const selectedItems = count ? shuffledItems.slice(0, count) : shuffledItems;
 
   return {
-    ...module,
-    items: selectedItems,
+    ...m,
+    items: count ? shuffled.slice(0, count) : shuffled,
   };
 }

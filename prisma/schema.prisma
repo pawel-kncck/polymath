@@ -1,4 +1,8 @@
 // Prisma schema for Polymath learning platform
+//
+// Scope: user-specific data only. Learning content (modules + items) lives
+// in the repo under `src/content/` so it's version-controlled and travels
+// with deploys. The DB stores: users, auth sessions, and quiz results.
 
 generator client {
   provider = "prisma-client"
@@ -67,53 +71,19 @@ model VerificationToken {
 // Polymath Application Models
 // ============================================
 
-// Module - container for quiz items (e.g., "English Plurals", "Algebra 1")
-// title, description, and item content payloads store LocalizedString values:
-//   { pl?: string, en?: string }
-// The `languages` array lists the locales this module supports. Single-language
-// modules (e.g. an English-grammar module) use ["en"]; bilingual modules use
-// ["pl", "en"] and every localizable field carries both locales.
-model Module {
-  id          String   @id @default(uuid())
-  title       Json     // LocalizedString
-  subject     String   // "LANGUAGE", "MATH", "LOGIC"
-  description Json     // LocalizedString
-  languages   String[] @default(["pl", "en"])
-  items       Item[]
-  results     Result[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-// ItemType enum - determines which renderer to use
-enum ItemType {
-  TEXT           // Simple Q&A (vocabulary, translations)
-  SINGLE_CHOICE  // Question with one correct option from a list
-  MATH_EQ        // LaTeX formulas (algebra)
-  GEOMETRY       // SVG shapes
-}
-
-// Item - individual quiz question with flexible JSON content
-model Item {
-  id        String   @id @default(uuid())
-  moduleId  String
-  type      ItemType @default(TEXT)
-  content   Json     // Flexible payload based on ItemType
-  module    Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-// Result - tracks quiz performance for analytics
+// Result — tracks quiz performance for analytics.
+// `moduleId` is a slug pointing at a content file in `src/content/modules/`.
+// There's intentionally no foreign key: content lives in git, not the DB.
+// If a module is renamed or removed the Result row remains, with `module`
+// resolution returning null at read time.
 model Result {
   id        String   @id @default(uuid())
   score     Int
   total     Int
   time      Int      // seconds
-  mistakes  Json     // array of mistake details
+  mistakes  Json     // array of mistake details (prompt/answer denormalized at save time)
   createdAt DateTime @default(now())
   userId    String
   moduleId  String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  module    Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
 }

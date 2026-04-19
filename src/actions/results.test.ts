@@ -47,12 +47,6 @@ describe('results actions', () => {
           correctAnswer: 'cats',
           userAnswer: 'cat',
         },
-        {
-          itemId: 'item2',
-          prompt: 'box',
-          correctAnswer: 'boxes',
-          userAnswer: 'boxs',
-        },
       ],
     };
 
@@ -60,7 +54,7 @@ describe('results actions', () => {
       const mockSavedResult = {
         id: 'result-123',
         userId: 'user-123',
-        moduleId: 'module-456',
+        moduleId: 'english-plurals',
         score: 8,
         total: 10,
         time: 120,
@@ -70,13 +64,13 @@ describe('results actions', () => {
 
       vi.mocked(prisma.result.create).mockResolvedValue(mockSavedResult as any);
 
-      const result = await saveResult('module-456', mockQuizResult);
+      const result = await saveResult('english-plurals', mockQuizResult);
 
       expect(requireAuth).toHaveBeenCalled();
       expect(prisma.result.create).toHaveBeenCalledWith({
         data: {
           userId: 'user-123',
-          moduleId: 'module-456',
+          moduleId: 'english-plurals',
           score: 8,
           total: 10,
           time: 120,
@@ -89,76 +83,66 @@ describe('results actions', () => {
     it('should throw error if not authenticated', async () => {
       vi.mocked(requireAuth).mockRejectedValue(new Error('Not authenticated'));
 
-      await expect(saveResult('module-456', mockQuizResult)).rejects.toThrow(
-        'Not authenticated'
-      );
+      await expect(
+        saveResult('english-plurals', mockQuizResult)
+      ).rejects.toThrow('Not authenticated');
 
       expect(prisma.result.create).not.toHaveBeenCalled();
     });
   });
 
   describe('getUserResults', () => {
-    it('should return results for current user', async () => {
-      const mockResults = [
+    it('attaches module metadata from the content loader', async () => {
+      const dbRows = [
         {
           id: 'result-1',
           userId: 'user-123',
-          moduleId: 'module-1',
+          moduleId: 'english-plurals',
           score: 8,
           total: 10,
           time: 120,
           mistakes: [],
           createdAt: new Date('2024-01-02'),
-          module: {
-            title: 'English Plurals',
-            subject: 'LANGUAGE',
-          },
-        },
-        {
-          id: 'result-2',
-          userId: 'user-123',
-          moduleId: 'module-1',
-          score: 10,
-          total: 10,
-          time: 90,
-          mistakes: [],
-          createdAt: new Date('2024-01-01'),
-          module: {
-            title: 'English Plurals',
-            subject: 'LANGUAGE',
-          },
         },
       ];
-
-      vi.mocked(prisma.result.findMany).mockResolvedValue(mockResults as any);
+      vi.mocked(prisma.result.findMany).mockResolvedValue(dbRows as any);
 
       const results = await getUserResults();
 
       expect(requireAuth).toHaveBeenCalled();
       expect(prisma.result.findMany).toHaveBeenCalledWith({
-        where: {
-          userId: 'user-123',
-        },
-        include: {
-          module: {
-            select: {
-              title: true,
-              subject: true,
-            },
-          },
-        },
-        orderBy: {
-          createdAt: 'desc',
-        },
+        where: { userId: 'user-123' },
+        orderBy: { createdAt: 'desc' },
       });
-      expect(results).toEqual(mockResults);
+      expect(results).toHaveLength(1);
+      expect(results[0].module).toEqual({
+        title: { en: 'English Plurals' },
+        subject: 'LANGUAGE',
+      });
+    });
+
+    it('returns module=null when the moduleId no longer resolves to a content file', async () => {
+      vi.mocked(prisma.result.findMany).mockResolvedValue([
+        {
+          id: 'result-orphan',
+          userId: 'user-123',
+          moduleId: 'removed-module',
+          score: 0,
+          total: 1,
+          time: 10,
+          mistakes: [],
+          createdAt: new Date(),
+        },
+      ] as any);
+
+      const results = await getUserResults();
+      expect(results[0].module).toBeNull();
     });
 
     it('should return empty array when user has no results', async () => {
       vi.mocked(prisma.result.findMany).mockResolvedValue([]);
 
       const results = await getUserResults();
-
       expect(results).toEqual([]);
     });
 
@@ -170,78 +154,44 @@ describe('results actions', () => {
   });
 
   describe('getResultById', () => {
-    it('should return result if owned by user', async () => {
-      const mockResult = {
+    it('returns the result with attached module metadata when owned by user', async () => {
+      const dbRow = {
         id: 'result-123',
         userId: 'user-123',
-        moduleId: 'module-1',
+        moduleId: 'english-plurals',
         score: 8,
         total: 10,
         time: 120,
         mistakes: [],
         createdAt: new Date(),
-        module: {
-          title: 'English Plurals',
-          subject: 'LANGUAGE',
-        },
       };
-
-      vi.mocked(prisma.result.findFirst).mockResolvedValue(mockResult as any);
+      vi.mocked(prisma.result.findFirst).mockResolvedValue(dbRow as any);
 
       const result = await getResultById('result-123');
 
       expect(requireAuth).toHaveBeenCalled();
       expect(prisma.result.findFirst).toHaveBeenCalledWith({
-        where: {
-          id: 'result-123',
-          userId: 'user-123',
-        },
-        include: {
-          module: {
-            select: {
-              title: true,
-              subject: true,
-            },
-          },
-        },
+        where: { id: 'result-123', userId: 'user-123' },
       });
-      expect(result).toEqual(mockResult);
+      expect(result?.module).toEqual({
+        title: { en: 'English Plurals' },
+        subject: 'LANGUAGE',
+      });
     });
 
-    it('should return null if result belongs to different user', async () => {
+    it('should return null if result does not exist or belongs to different user', async () => {
       vi.mocked(prisma.result.findFirst).mockResolvedValue(null);
 
       const result = await getResultById('result-456');
-
-      expect(result).toBeNull();
-      expect(prisma.result.findFirst).toHaveBeenCalledWith({
-        where: {
-          id: 'result-456',
-          userId: 'user-123',
-        },
-        include: {
-          module: {
-            select: {
-              title: true,
-              subject: true,
-            },
-          },
-        },
-      });
-    });
-
-    it('should return null if result does not exist', async () => {
-      vi.mocked(prisma.result.findFirst).mockResolvedValue(null);
-
-      const result = await getResultById('invalid-id');
-
       expect(result).toBeNull();
     });
 
     it('should throw error if not authenticated', async () => {
       vi.mocked(requireAuth).mockRejectedValue(new Error('Not authenticated'));
 
-      await expect(getResultById('result-123')).rejects.toThrow('Not authenticated');
+      await expect(getResultById('result-123')).rejects.toThrow(
+        'Not authenticated'
+      );
     });
   });
 });

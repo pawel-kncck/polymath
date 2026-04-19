@@ -59,12 +59,18 @@ export function useQuiz({ items, onComplete }: UseQuizOptions) {
   );
 
   /**
-   * Submit the current answer
+   * Submit the current answer. Pass an override to submit a value directly
+   * without waiting for setUserAnswer to flush (e.g. click-to-submit renderers).
    */
-  const submitAnswer = useCallback(() => {
-    if (!userAnswer.trim() || feedback !== null) return;
+  const submitAnswer = useCallback((overrideAnswer?: string) => {
+    const answer = overrideAnswer ?? userAnswer;
+    if (!answer.trim() || feedback !== null) return;
 
-    const isCorrect = checkAnswer(userAnswer);
+    if (overrideAnswer !== undefined) {
+      setUserAnswer(overrideAnswer);
+    }
+
+    const isCorrect = checkAnswer(answer);
     setFeedback(isCorrect ? 'correct' : 'incorrect');
 
     // Record mistake if incorrect
@@ -78,7 +84,7 @@ export function useQuiz({ items, onComplete }: UseQuizOptions) {
           itemId: currentItem.id,
           prompt,
           correctAnswer,
-          userAnswer: userAnswer.trim(),
+          userAnswer: answer.trim(),
         },
       ]);
     }
@@ -102,7 +108,7 @@ export function useQuiz({ items, onComplete }: UseQuizOptions) {
             itemId: currentItem.id,
             prompt: getPrompt(currentItem),
             correctAnswer: getCorrectAnswer(currentItem),
-            userAnswer: userAnswer.trim(),
+            userAnswer: answer.trim(),
           }],
         };
 

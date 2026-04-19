@@ -8,6 +8,16 @@ export interface TextContent {
 }
 
 /**
+ * Content type for SINGLE_CHOICE items (one correct option from a list)
+ */
+export interface SingleChoiceContent {
+  prompt: string;
+  options: string[];
+  answer: string;
+  hint?: string;
+}
+
+/**
  * Content type for MATH_EQ items (algebra, equations)
  */
 export interface MathContent {

@@ -5,30 +5,29 @@ import { useRouter } from 'next/navigation';
 import { QuizRunner } from '@/components/quiz/QuizRunner';
 import { QuizResults } from '@/components/quiz/QuizResults';
 import { saveResult } from '@/actions/results';
-import type { QuizResult } from '@/types/quiz';
-import type { Item } from '@/generated/prisma/client';
+import { useT } from '@/i18n/provider';
+import type { QuizItem, QuizResult } from '@/types/quiz';
 
 interface QuizClientProps {
   moduleId: string;
-  items: Item[];
+  items: QuizItem[];
 }
 
 export function QuizClient({ moduleId, items }: QuizClientProps) {
   const router = useRouter();
+  const t = useT();
   const [result, setResult] = useState<QuizResult | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [key, setKey] = useState(0); // Key to force QuizRunner remount on retry
+  const [key, setKey] = useState(0);
 
   const handleComplete = async (quizResult: QuizResult) => {
     setResult(quizResult);
     setIsSaving(true);
 
     try {
-      // Save result to database
       await saveResult(moduleId, quizResult);
     } catch (error) {
       console.error('Failed to save result:', error);
-      // Continue showing results even if save fails
     } finally {
       setIsSaving(false);
     }
@@ -36,31 +35,29 @@ export function QuizClient({ moduleId, items }: QuizClientProps) {
 
   const handleRetry = () => {
     setResult(null);
-    setKey((prev) => prev + 1); // Force remount to reset state
+    setKey((prev) => prev + 1);
   };
 
   const handleBack = () => {
-    router.push('/quiz');
+    router.push('/');
   };
-
-  // Transform Prisma items to QuizItem format
-  const quizItems = items.map((item) => ({
-    id: item.id,
-    type: item.type as 'TEXT' | 'MATH_EQ' | 'GEOMETRY',
-    content: item.content,
-  }));
 
   return (
     <div>
       {result ? (
         <QuizResults result={result} onRetry={handleRetry} onBack={handleBack} />
       ) : (
-        <QuizRunner key={key} items={quizItems} onComplete={handleComplete} />
+        <QuizRunner
+          key={key}
+          items={items}
+          onComplete={handleComplete}
+          onExit={handleBack}
+        />
       )}
 
       {isSaving && (
         <div className="fixed bottom-4 right-4 rounded-lg bg-blue-600 px-4 py-2 text-white shadow-lg">
-          Saving result...
+          {t.results.savingResult}
         </div>
       )}
     </div>

@@ -1,12 +1,17 @@
 'use server';
 
 import { prisma } from '@/lib/db';
+import { getLocale } from '@/i18n/server';
 
 /**
- * Get all modules with their item counts
+ * Get all modules for the current locale, with item counts.
+ * Filters by the `languages` array so EN-only modules hide in PL mode and
+ * vice versa.
  */
 export async function getModules() {
+  const locale = await getLocale();
   const modules = await prisma.module.findMany({
+    where: { languages: { has: locale } },
     include: {
       _count: {
         select: { items: true },
@@ -20,9 +25,6 @@ export async function getModules() {
   return modules;
 }
 
-/**
- * Get a single module by ID with all its items
- */
 export async function getModuleById(id: string) {
   const module = await prisma.module.findUnique({
     where: { id },
@@ -35,9 +37,7 @@ export async function getModuleById(id: string) {
 }
 
 /**
- * Get a module with a random selection of items for quiz
- * @param moduleId - The module ID
- * @param count - Number of random items to return (default: all items)
+ * Get a module with a random selection of items for quiz.
  */
 export async function getModuleWithRandomItems(moduleId: string, count?: number) {
   const module = await prisma.module.findUnique({
@@ -51,14 +51,12 @@ export async function getModuleWithRandomItems(moduleId: string, count?: number)
     return null;
   }
 
-  // Shuffle items using Fisher-Yates algorithm
   const shuffledItems = [...module.items];
   for (let i = shuffledItems.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [shuffledItems[i], shuffledItems[j]] = [shuffledItems[j], shuffledItems[i]];
   }
 
-  // Return specified count or all items
   const selectedItems = count ? shuffledItems.slice(0, count) : shuffledItems;
 
   return {

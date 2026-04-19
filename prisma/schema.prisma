@@ -67,11 +67,17 @@ model VerificationToken {
 // ============================================
 
 // Module - container for quiz items (e.g., "English Plurals", "Algebra 1")
+// title, description, and item content payloads store LocalizedString values:
+//   { pl?: string, en?: string }
+// The `languages` array lists the locales this module supports. Single-language
+// modules (e.g. an English-grammar module) use ["en"]; bilingual modules use
+// ["pl", "en"] and every localizable field carries both locales.
 model Module {
   id          String   @id @default(uuid())
-  title       String
+  title       Json     // LocalizedString
   subject     String   // "LANGUAGE", "MATH", "LOGIC"
-  description String
+  description Json     // LocalizedString
+  languages   String[] @default(["pl", "en"])
   items       Item[]
   results     Result[]
   createdAt   DateTime @default(now())
@@ -80,9 +86,10 @@ model Module {
 
 // ItemType enum - determines which renderer to use
 enum ItemType {
-  TEXT      // Simple Q&A (vocabulary, translations)
-  MATH_EQ   // LaTeX formulas (algebra)
-  GEOMETRY  // SVG shapes
+  TEXT           // Simple Q&A (vocabulary, translations)
+  SINGLE_CHOICE  // Question with one correct option from a list
+  MATH_EQ        // LaTeX formulas (algebra)
+  GEOMETRY       // SVG shapes
 }
 
 // Item - individual quiz question with flexible JSON content

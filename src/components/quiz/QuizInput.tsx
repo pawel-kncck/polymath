@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { useT } from '@/i18n/provider';
 
 interface QuizInputProps {
   value: string;
@@ -17,6 +18,7 @@ export function QuizInput({
   feedback,
   disabled = false,
 }: QuizInputProps) {
+  const t = useT();
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Auto-focus input on mount and when feedback clears
@@ -53,7 +55,7 @@ export function QuizInput({
         onKeyDown={handleKeyDown}
         disabled={disabled || feedback !== null}
         className={`w-full rounded-lg border-2 px-4 py-3 text-lg transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 ${getFeedbackStyles()}`}
-        placeholder="Type your answer..."
+        placeholder={t.quiz.typeAnswerPlaceholder}
         autoComplete="off"
         spellCheck="false"
       />

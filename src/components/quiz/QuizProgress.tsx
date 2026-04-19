@@ -1,15 +1,21 @@
+'use client';
+
+import { useT } from '@/i18n/provider';
+import { format } from '@/i18n/format';
+
 interface QuizProgressProps {
   current: number;
   total: number;
 }
 
 export function QuizProgress({ current, total }: QuizProgressProps) {
+  const t = useT();
   const percentage = (current / total) * 100;
 
   return (
     <div className="w-full space-y-2">
       <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
-        <span>Question {current} of {total}</span>
+        <span>{format(t.quiz.questionOf, { current, total })}</span>
         <span>{Math.round(percentage)}%</span>
       </div>
       <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">

@@ -23,6 +23,6 @@ export interface QuizResult {
  */
 export interface QuizItem {
   id: string;
-  type: 'TEXT' | 'MATH_EQ' | 'GEOMETRY';
+  type: 'TEXT' | 'SINGLE_CHOICE' | 'MATH_EQ' | 'GEOMETRY';
   content: unknown;
 }

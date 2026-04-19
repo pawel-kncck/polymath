@@ -1,13 +1,22 @@
 import { signIn } from '@/lib/auth';
+import { getMessages } from '@/i18n/server';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
-export default function SignInPage() {
+export default async function SignInPage() {
+  const isDev = process.env.NODE_ENV !== 'production';
+  const t = await getMessages();
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
       <div className="w-full max-w-md space-y-8 p-8">
+        <div className="flex justify-end">
+          <LanguageSwitcher />
+        </div>
+
         <div className="text-center">
-          <h1 className="text-3xl font-bold">Polymath</h1>
+          <h1 className="text-3xl font-bold">{t.common.appName}</h1>
           <p className="mt-2 text-gray-600 dark:text-gray-400">
-            Sign in to continue learning
+            {t.signin.subtitle}
           </p>
         </div>
 
@@ -39,9 +48,44 @@ export default function SignInPage() {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
               />
             </svg>
-            Sign in with Google
+            {t.signin.withGoogle}
           </button>
         </form>
+
+        {isDev && (
+          <div className="space-y-3 rounded-lg border border-dashed border-amber-400 bg-amber-50 p-4 dark:border-amber-700 dark:bg-amber-950/30">
+            <div className="text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-400">
+              {t.signin.devLoginLabel}
+            </div>
+            <p className="text-xs text-amber-800 dark:text-amber-300">
+              {t.signin.devLoginHint}
+            </p>
+            <form
+              action={async (formData) => {
+                'use server';
+                await signIn('credentials', {
+                  email: formData.get('email'),
+                  redirectTo: '/',
+                });
+              }}
+              className="space-y-2"
+            >
+              <input
+                name="email"
+                type="email"
+                required
+                defaultValue="dev@localhost"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+              />
+              <button
+                type="submit"
+                className="w-full rounded-md bg-amber-600 px-3 py-2 text-sm font-medium text-white hover:bg-amber-700"
+              >
+                {t.signin.devLoginSubmit}
+              </button>
+            </form>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -51,6 +51,13 @@ COPY --from=builder /app/public ./public
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
+# 5. Files needed by `npm run db:seed` (tsx/prisma/seed.ts). The seed imports
+#    the generated Prisma client via the `@/` alias, so we need both the
+#    generated sources and tsconfig.json (for tsx's path-alias resolution).
+#    Next.js's standalone output strips everything under src/, so we have
+#    to copy these explicitly.
+COPY --from=builder /app/src/generated ./src/generated
+COPY --from=builder /app/tsconfig.json ./tsconfig.json
 
 USER nextjs
 EXPOSE 3000

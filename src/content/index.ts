@@ -1,6 +1,7 @@
 import type { ContentModule } from './types';
 import { englishPlurals } from './modules/english-plurals';
 import { generalKnowledge } from './modules/general-knowledge';
+import { kartaRowerowa } from './modules/karta-rowerowa';
 import { sentencePartsLevel1 } from './modules/sentence-parts-level-1';
 import { sentencePartsLevel2 } from './modules/sentence-parts-level-2';
 import { sentencePartsLevel3 } from './modules/sentence-parts-level-3';
@@ -24,6 +25,7 @@ const modules: ContentModule[] = [
   sentencePartsLevel8,
   englishPlurals,
   generalKnowledge,
+  kartaRowerowa,
 ];
 
 const moduleIndex = new Map<string, ContentModule>(

@@ -7,6 +7,7 @@ export const sentencePartsLevel4: ContentModule = {
     pl: 'Ostatnia z pięciu części — przydawka określa rzeczownik (jaki? który? czyj?)',
   },
   subject: 'LANGUAGE',
+  category: 'POLISH',
   languages: ['pl'],
   items: [
     {

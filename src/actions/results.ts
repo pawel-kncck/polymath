@@ -64,3 +64,64 @@ export async function getResultById(resultId: string) {
 
   return result ? attachModule(result) : null;
 }
+
+export type ModuleProgress = {
+  moduleId: string;
+  attempts: number;
+  bestScore: number;
+  bestTotal: number;
+  bestPercent: number;
+  lastAttemptAt: Date;
+};
+
+/**
+ * Aggregate the current user's quiz attempts per module. Used by the home
+ * page to show completion badges / best score next to each quiz card.
+ */
+export async function getUserModuleProgress(): Promise<
+  Record<string, ModuleProgress>
+> {
+  const session = await requireAuth();
+
+  const results = (await prisma.result.findMany({
+    where: { userId: session.user.id },
+    select: {
+      moduleId: true,
+      score: true,
+      total: true,
+      createdAt: true,
+    },
+  })) as Array<{
+    moduleId: string;
+    score: number;
+    total: number;
+    createdAt: Date;
+  }>;
+
+  const byModule: Record<string, ModuleProgress> = {};
+  for (const r of results) {
+    const percent = r.total > 0 ? r.score / r.total : 0;
+    const existing = byModule[r.moduleId];
+    if (!existing) {
+      byModule[r.moduleId] = {
+        moduleId: r.moduleId,
+        attempts: 1,
+        bestScore: r.score,
+        bestTotal: r.total,
+        bestPercent: percent,
+        lastAttemptAt: r.createdAt,
+      };
+      continue;
+    }
+    existing.attempts += 1;
+    if (percent > existing.bestPercent) {
+      existing.bestScore = r.score;
+      existing.bestTotal = r.total;
+      existing.bestPercent = percent;
+    }
+    if (r.createdAt > existing.lastAttemptAt) {
+      existing.lastAttemptAt = r.createdAt;
+    }
+  }
+  return byModule;
+}

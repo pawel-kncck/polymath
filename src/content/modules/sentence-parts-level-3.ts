@@ -7,6 +7,7 @@ export const sentencePartsLevel3: ContentModule = {
     pl: 'Do znanych części dochodzi okolicznik — gdzie, kiedy, jak, dlaczego',
   },
   subject: 'LANGUAGE',
+  category: 'POLISH',
   languages: ['pl'],
   items: [
     {

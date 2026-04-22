@@ -1,5 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { saveResult, getUserResults, getResultById } from './results';
+import {
+  saveResult,
+  getUserResults,
+  getResultById,
+  getUserModuleProgress,
+} from './results';
 import type { QuizResult } from '@/types/quiz';
 
 // Mock dependencies
@@ -190,6 +195,84 @@ describe('results actions', () => {
       vi.mocked(requireAuth).mockRejectedValue(new Error('Not authenticated'));
 
       await expect(getResultById('result-123')).rejects.toThrow(
+        'Not authenticated'
+      );
+    });
+  });
+
+  describe('getUserModuleProgress', () => {
+    it('aggregates attempts and keeps the best score per module', async () => {
+      vi.mocked(prisma.result.findMany).mockResolvedValue([
+        {
+          moduleId: 'english-plurals',
+          score: 6,
+          total: 10,
+          createdAt: new Date('2024-01-01T10:00:00Z'),
+        },
+        {
+          moduleId: 'english-plurals',
+          score: 9,
+          total: 10,
+          createdAt: new Date('2024-01-02T10:00:00Z'),
+        },
+        {
+          moduleId: 'general-knowledge',
+          score: 5,
+          total: 5,
+          createdAt: new Date('2024-01-03T10:00:00Z'),
+        },
+      ] as any);
+
+      const progress = await getUserModuleProgress();
+
+      expect(prisma.result.findMany).toHaveBeenCalledWith({
+        where: { userId: 'user-123' },
+        select: {
+          moduleId: true,
+          score: true,
+          total: true,
+          createdAt: true,
+        },
+      });
+      expect(progress['english-plurals']).toMatchObject({
+        attempts: 2,
+        bestScore: 9,
+        bestTotal: 10,
+        bestPercent: 0.9,
+      });
+      expect(progress['english-plurals'].lastAttemptAt).toEqual(
+        new Date('2024-01-02T10:00:00Z')
+      );
+      expect(progress['general-knowledge']).toMatchObject({
+        attempts: 1,
+        bestScore: 5,
+        bestTotal: 5,
+        bestPercent: 1,
+      });
+    });
+
+    it('returns an empty object when the user has no results', async () => {
+      vi.mocked(prisma.result.findMany).mockResolvedValue([] as any);
+      const progress = await getUserModuleProgress();
+      expect(progress).toEqual({});
+    });
+
+    it('handles a zero-total guard without dividing by zero', async () => {
+      vi.mocked(prisma.result.findMany).mockResolvedValue([
+        {
+          moduleId: 'empty-mod',
+          score: 0,
+          total: 0,
+          createdAt: new Date(),
+        },
+      ] as any);
+      const progress = await getUserModuleProgress();
+      expect(progress['empty-mod'].bestPercent).toBe(0);
+    });
+
+    it('throws when not authenticated', async () => {
+      vi.mocked(requireAuth).mockRejectedValue(new Error('Not authenticated'));
+      await expect(getUserModuleProgress()).rejects.toThrow(
         'Not authenticated'
       );
     });

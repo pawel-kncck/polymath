@@ -18,6 +18,7 @@ export async function getModules() {
       title: m.title,
       description: m.description,
       subject: m.subject,
+      category: m.category,
       languages: m.languages,
       _count: { items: m.items.length },
     }));

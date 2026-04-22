@@ -7,6 +7,7 @@ export const sentencePartsLevel2: ContentModule = {
     pl: 'Do podmiotu i orzeczenia dochodzi dopełnienie — na co pada czynność',
   },
   subject: 'LANGUAGE',
+  category: 'POLISH',
   languages: ['pl'],
   items: [
     {

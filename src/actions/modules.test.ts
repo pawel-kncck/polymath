@@ -33,6 +33,41 @@ describe('modules actions (content-loader backed)', () => {
       expect(english?._count.items).toBe(10);
     });
 
+    it('exposes the category on each module', async () => {
+      const result = await getModules();
+
+      expect(result.find((m) => m.id === 'english-plurals')?.category).toBe(
+        'ENGLISH'
+      );
+      expect(result.find((m) => m.id === 'general-knowledge')?.category).toBe(
+        'GENERAL_KNOWLEDGE'
+      );
+    });
+
+    it('categorizes polish sentence-parts modules as POLISH', async () => {
+      const { getLocale } = await import('@/i18n/server');
+      vi.mocked(getLocale).mockResolvedValueOnce('pl');
+
+      const result = await getModules();
+      const polishModules = result.filter((m) =>
+        m.id.startsWith('sentence-parts-level-')
+      );
+      expect(polishModules.length).toBeGreaterThan(0);
+      for (const m of polishModules) {
+        expect(m.category).toBe('POLISH');
+      }
+    });
+
+    it('categorizes karta-rowerowa under its own category', async () => {
+      const { getLocale } = await import('@/i18n/server');
+      vi.mocked(getLocale).mockResolvedValueOnce('pl');
+
+      const result = await getModules();
+      expect(result.find((m) => m.id === 'karta-rowerowa')?.category).toBe(
+        'KARTA_ROWEROWA'
+      );
+    });
+
     it('filters out modules that do not support the active locale', async () => {
       const { getLocale } = await import('@/i18n/server');
       vi.mocked(getLocale).mockResolvedValueOnce('pl');

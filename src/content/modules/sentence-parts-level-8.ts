@@ -7,6 +7,7 @@ export const sentencePartsLevel8: ContentModule = {
     pl: 'Orzeczenie złożone (imienne, modalne, fazowe), podmiot domyślny i szeregowy, dopełnienie bliższe vs dalsze',
   },
   subject: 'LANGUAGE',
+  category: 'POLISH',
   languages: ['pl'],
   items: [
     {

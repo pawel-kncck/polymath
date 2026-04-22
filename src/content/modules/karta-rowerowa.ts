@@ -9,6 +9,7 @@ export const kartaRowerowa: ContentModule = {
     pl: 'Przygotowanie do egzaminu na kartę rowerową: przepisy, znaki drogowe, pierwszeństwo, wyposażenie roweru i pierwsza pomoc',
   },
   subject: 'LOGIC',
+  category: 'KARTA_ROWEROWA',
   languages: ['pl'],
   items: [
     {

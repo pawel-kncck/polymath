@@ -5,6 +5,7 @@ export const sentencePartsLevel6: ContentModule = {
   title: { pl: 'Części zdania — poziom 6: Pytania pomocnicze' },
   description: { pl: 'Dopasowanie części zdania do pytań, na które odpowiada' },
   subject: 'LANGUAGE',
+  category: 'POLISH',
   languages: ['pl'],
   items: [
     {

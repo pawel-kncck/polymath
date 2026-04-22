@@ -5,6 +5,7 @@ export const sentencePartsLevel1: ContentModule = {
   title: { pl: 'Części zdania — poziom 1: Podmiot i orzeczenie' },
   description: { pl: 'Rozpoznawanie podmiotu i orzeczenia w prostych zdaniach' },
   subject: 'LANGUAGE',
+  category: 'POLISH',
   languages: ['pl'],
   items: [
     {

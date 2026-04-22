@@ -11,6 +11,7 @@ export const generalKnowledge: ContentModule = {
     en: 'Quick single-choice questions to warm up',
   },
   subject: 'LOGIC',
+  category: 'GENERAL_KNOWLEDGE',
   languages: ['pl', 'en'],
   items: [
     {

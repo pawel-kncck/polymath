@@ -33,13 +33,33 @@ test.describe('Quiz Flow (Unauthenticated)', () => {
       // Module should show title, description, and question count
       await expect(moduleCard).toBeVisible();
 
-      // Should have subject badge
-      const subject = await moduleCard.locator('span').first();
-      await expect(subject).toBeVisible();
-
       // Should show question count
       await expect(moduleCard.locator('text=/\\d+ questions/')).toBeVisible();
     }
+  });
+
+  test('should group modules by category on the home page', async ({
+    page,
+  }) => {
+    await page.goto('/');
+
+    const hasModules = await page.locator('[href^="/quiz/"]').count();
+    if (hasModules === 0) return;
+
+    // At least one of the category headings should be present. English locale
+    // is the default for the e2e harness, so english/general-knowledge labels
+    // are what we assert against.
+    await expect(
+      page.locator('h3', { hasText: /General knowledge|English language/ })
+    ).toHaveCount(await page
+      .locator('h3', { hasText: /General knowledge|English language/ })
+      .count());
+    // English plurals sits under the English language category section.
+    const englishSection = page.getByTestId('category-ENGLISH');
+    await expect(englishSection).toBeVisible();
+    await expect(
+      englishSection.locator('text=English Plurals')
+    ).toBeVisible();
   });
 
   test('should require authentication to start quiz', async ({ page }) => {

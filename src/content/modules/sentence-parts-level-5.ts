@@ -7,6 +7,7 @@ export const sentencePartsLevel5: ContentModule = {
     pl: 'Różne zdania — każde słowo może być dowolną częścią zdania',
   },
   subject: 'LANGUAGE',
+  category: 'POLISH',
   languages: ['pl'],
   items: [
     {

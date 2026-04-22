@@ -7,6 +7,7 @@ export const sentencePartsLevel7: ContentModule = {
     pl: 'Okolicznik miejsca / czasu / sposobu / przyczyny / celu / stopnia; przydawka przymiotna / rzeczowna / liczebna / zaimkowa',
   },
   subject: 'LANGUAGE',
+  category: 'POLISH',
   languages: ['pl'],
   items: [
     {

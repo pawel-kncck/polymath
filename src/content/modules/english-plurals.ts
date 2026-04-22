@@ -5,6 +5,7 @@ export const englishPlurals: ContentModule = {
   title: { en: 'English Plurals' },
   description: { en: 'Practice forming plural nouns in English' },
   subject: 'LANGUAGE',
+  category: 'ENGLISH',
   languages: ['en'],
   items: [
     {

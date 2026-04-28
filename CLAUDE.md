@@ -139,15 +139,23 @@ codebase. Full guide and troubleshooting: see `lr15a/templates/CLAUDE-platform.m
 
 ### Fast debug commands
 
+> **Concrete values (server host, SSH user, readonly DB URL) are NOT in this
+> public repo.** They live in Claude's local memory at `agent_access.md` and
+> `db_readonly_credentials.md` (under `~/.claude/projects/.../memory/`). The
+> agent should look them up there and either export the env vars below for
+> the session, or substitute inline.
+
 ```bash
-SSH="ssh -i ~/.ssh/claude_lr15a claude@46.224.172.134"
+# Set once per shell — values come from Claude memory `agent_access.md`:
+#   export LR15A_SSH='ssh -i ~/.ssh/claude_lr15a <user>@<host>'
+#   export POLYMATH_RO_URL='postgresql://polymath_readonly:...@<vpn-host>:5432/polymath_db'
 
 # "Is my last push deployed and running?"
-$SSH app-status polymath
+$LR15A_SSH app-status polymath
 
 # "What's the latest error in production?"
-$SSH app-logs polymath --tail 500
-$SSH app-logs polymath --since 1h --timestamps
+$LR15A_SSH app-logs polymath --tail 500
+$LR15A_SSH app-logs polymath --since 1h --timestamps
 
 # "Did my migration run on prod?"
 psql "$POLYMATH_RO_URL" -c "SELECT migration_name, finished_at FROM _prisma_migrations ORDER BY finished_at DESC LIMIT 5;"
@@ -158,14 +166,14 @@ psql "$POLYMATH_RO_URL" -c "SELECT count(*) FROM \"Module\";"
 psql "$POLYMATH_RO_URL" -c "SELECT count(*) FROM \"Result\";"
 
 # "What's the DB size? Active connections?"
-$SSH pg-databases
-$SSH pg-connections
+$LR15A_SSH pg-databases
+$LR15A_SSH pg-connections
 ```
 
-`POLYMATH_RO_URL` is in Claude memory under `db_readonly_credentials.md`. The
-form is `postgresql://polymath_readonly:<password>@10.7.0.1:5432/polymath_db`
-and **requires WireGuard to be active on this machine** (the Postgres port is
-firewalled to the VPN subnet). If `psql` hangs, run `wg show` to verify VPN.
+DB access **requires WireGuard active on the agent's machine** (the Postgres
+port is firewalled to the VPN subnet). If `psql` hangs, run `wg show` to
+verify VPN is up. If `agent_access.md` isn't in Claude memory yet, the agent
+hasn't been bootstrapped — see `lr15a/docs/agent-access-setup.md` (private repo).
 
 Note: Prisma uses Pascal-case quoted table names (`"User"`, `"Module"`,
 `"Result"`, `"Account"`, `"Session"`, `"VerificationToken"`) — quote them in

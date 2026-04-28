@@ -119,3 +119,64 @@ Run `./deploy-test.sh --build-only` (requires Docker) to verify the image builds
 - `prisma.config.ts` is the single source of the database URL for the CLI.
 - The Dockerfile overlays the full `node_modules` from the `deps` stage on top of the Next.js standalone output, because Prisma 7's CLI has too deep a dependency tree to cherry-pick.
 - Migrations run on container startup via `npx prisma migrate deploy && node server.js`.
+
+## Platform Access (lr15a — Production Debug)
+
+This app runs on the **lr15a** platform (Hetzner CX43, Coolify-managed). Use
+the read-only access below to debug production issues without leaving the
+codebase. Full guide and troubleshooting: see `lr15a/templates/CLAUDE-platform.md`.
+
+### Identity
+
+| | |
+|---|---|
+| **App name (use with `app-*` commands)** | `polymath` |
+| **Public URL** | https://polymath.lr15a.pl |
+| **Database** | `polymath_db` on shared Postgres 17 (container `tmapstq47cradeaqx7dbxxly`) |
+| **App user** | `polymath_user` (least-priv, set via Coolify `DATABASE_URL`) |
+| **Read-only role for agents** | `polymath_readonly` (SELECT only on `public` schema) |
+| **ORM** | Prisma 7 — migrations in `prisma/migrations/`, applied via `prisma migrate deploy` at startup; tracking table is `public._prisma_migrations` |
+
+### Fast debug commands
+
+```bash
+SSH="ssh -i ~/.ssh/claude_lr15a claude@46.224.172.134"
+
+# "Is my last push deployed and running?"
+$SSH app-status polymath
+
+# "What's the latest error in production?"
+$SSH app-logs polymath --tail 500
+$SSH app-logs polymath --since 1h --timestamps
+
+# "Did my migration run on prod?"
+psql "$POLYMATH_RO_URL" -c "SELECT migration_name, finished_at FROM _prisma_migrations ORDER BY finished_at DESC LIMIT 5;"
+
+# "How many users / modules / results do we have?"
+psql "$POLYMATH_RO_URL" -c "SELECT count(*) FROM \"User\";"
+psql "$POLYMATH_RO_URL" -c "SELECT count(*) FROM \"Module\";"
+psql "$POLYMATH_RO_URL" -c "SELECT count(*) FROM \"Result\";"
+
+# "What's the DB size? Active connections?"
+$SSH pg-databases
+$SSH pg-connections
+```
+
+`POLYMATH_RO_URL` is in Claude memory under `db_readonly_credentials.md`. The
+form is `postgresql://polymath_readonly:<password>@10.7.0.1:5432/polymath_db`
+and **requires WireGuard to be active on this machine** (the Postgres port is
+firewalled to the VPN subnet). If `psql` hangs, run `wg show` to verify VPN.
+
+Note: Prisma uses Pascal-case quoted table names (`"User"`, `"Module"`,
+`"Result"`, `"Account"`, `"Session"`, `"VerificationToken"`) — quote them in
+SQL.
+
+### Constraints
+
+- Agent has **no write access** to production. Schema changes happen only via
+  Prisma migrations in this repo, applied by the app on deploy.
+- Container names change on every Coolify redeploy — always use `app-logs polymath` /
+  `app-status polymath`, not raw container IDs.
+- For deploy/build logs older than the current container, query the Coolify API
+  (`/applications/{uuid}/logs`); the agent SSH wrapper only sees the running
+  container.

@@ -160,9 +160,9 @@ $LR15A_SSH app-logs polymath --since 1h --timestamps
 # "Did my migration run on prod?"
 psql "$POLYMATH_RO_URL" -c "SELECT migration_name, finished_at FROM _prisma_migrations ORDER BY finished_at DESC LIMIT 5;"
 
-# "How many users / modules / results do we have?"
+# "How many users / sessions / results do we have?"
 psql "$POLYMATH_RO_URL" -c "SELECT count(*) FROM \"User\";"
-psql "$POLYMATH_RO_URL" -c "SELECT count(*) FROM \"Module\";"
+psql "$POLYMATH_RO_URL" -c "SELECT count(*) FROM \"Session\";"
 psql "$POLYMATH_RO_URL" -c "SELECT count(*) FROM \"Result\";"
 
 # "What's the DB size? Active connections?"

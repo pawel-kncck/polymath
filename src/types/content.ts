@@ -36,3 +36,27 @@ export interface GeometryContent {
   labels?: string[];
   answer: string;
 }
+
+/**
+ * Content type for FRACTION_EXPAND items (multiply numerator + denominator
+ * by `factor` to produce an equivalent fraction).
+ */
+export interface FractionExpandContent {
+  numerator: number;
+  denominator: number;
+  factor: number;
+  // Computed at content build time: `${numerator * factor}/${denominator * factor}`.
+  answer: string;
+  instruction: string;
+}
+
+/**
+ * Content type for FRACTION_SIMPLIFY items (reduce to lowest terms).
+ */
+export interface FractionSimplifyContent {
+  numerator: number;
+  denominator: number;
+  // Computed at content build time: `${reducedNumerator}/${reducedDenominator}`.
+  answer: string;
+  instruction: string;
+}

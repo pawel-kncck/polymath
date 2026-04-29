@@ -69,6 +69,9 @@ export default async function ProgressPage() {
                     {t.progress.columnCategory}
                   </th>
                   <th scope="col" className="px-4 py-3">
+                    {t.progress.columnLevel}
+                  </th>
+                  <th scope="col" className="px-4 py-3">
                     {t.progress.columnScore}
                   </th>
                   <th scope="col" className="px-4 py-3">
@@ -77,6 +80,7 @@ export default async function ProgressPage() {
                   <th scope="col" className="px-4 py-3">
                     {t.progress.columnDate}
                   </th>
+                  <th scope="col" className="px-4 py-3" />
                 </tr>
               </thead>
               <tbody>
@@ -113,6 +117,9 @@ export default async function ProgressPage() {
                         {categoryLabel}
                       </td>
                       <td className="px-4 py-3 text-gray-700 dark:text-gray-300">
+                        {r.level ?? '—'}
+                      </td>
+                      <td className="px-4 py-3 text-gray-700 dark:text-gray-300">
                         {r.score}/{r.total}{' '}
                         <span className="text-gray-500">({percent}%)</span>
                       </td>
@@ -121,6 +128,15 @@ export default async function ProgressPage() {
                       </td>
                       <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
                         {dateFormatter.format(new Date(r.createdAt))}
+                      </td>
+                      <td className="px-4 py-3">
+                        <Link
+                          href={`/progress/${r.id}`}
+                          className="text-sm font-medium text-blue-600 hover:underline dark:text-blue-400"
+                          data-testid={`progress-review-link-${r.id}`}
+                        >
+                          {t.progress.reviewLink}
+                        </Link>
                       </td>
                     </tr>
                   );

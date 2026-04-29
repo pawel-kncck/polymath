@@ -64,6 +64,7 @@ describe('results actions', () => {
         total: 10,
         time: 120,
         mistakes: mockQuizResult.mistakes,
+        level: null,
         createdAt: new Date(),
       };
 
@@ -80,9 +81,38 @@ describe('results actions', () => {
           total: 10,
           time: 120,
           mistakes: mockQuizResult.mistakes,
+          level: null,
         },
       });
       expect(result).toEqual(mockSavedResult);
+    });
+
+    it('persists the difficulty level when supplied', async () => {
+      const mockSavedResult = {
+        id: 'result-456',
+        userId: 'user-123',
+        moduleId: 'fractions-expanding',
+        score: 5,
+        total: 5,
+        time: 90,
+        mistakes: [],
+        level: 2,
+        createdAt: new Date(),
+      };
+      vi.mocked(prisma.result.create).mockResolvedValue(mockSavedResult as any);
+
+      await saveResult(
+        'fractions-expanding',
+        { ...mockQuizResult, score: 5, total: 5, time: 90, mistakes: [] },
+        2
+      );
+
+      expect(prisma.result.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          moduleId: 'fractions-expanding',
+          level: 2,
+        }),
+      });
     });
 
     it('should throw error if not authenticated', async () => {

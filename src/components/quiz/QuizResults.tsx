@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import type { QuizResult } from '@/types/quiz';
 import { MistakesList } from './MistakesList';
 import { useT } from '@/i18n/provider';
@@ -8,9 +9,15 @@ interface QuizResultsProps {
   result: QuizResult;
   onRetry: () => void;
   onBack: () => void;
+  reviewHref?: string | null;
 }
 
-export function QuizResults({ result, onRetry, onBack }: QuizResultsProps) {
+export function QuizResults({
+  result,
+  onRetry,
+  onBack,
+  reviewHref,
+}: QuizResultsProps) {
   const t = useT();
   const percentage = Math.round((result.score / result.total) * 100);
   const isPerfect = result.score === result.total;
@@ -59,7 +66,7 @@ export function QuizResults({ result, onRetry, onBack }: QuizResultsProps) {
         </div>
       )}
 
-      <div className="flex gap-4">
+      <div className="flex flex-wrap gap-4">
         <button
           onClick={onRetry}
           className="flex-1 rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700"
@@ -73,6 +80,16 @@ export function QuizResults({ result, onRetry, onBack }: QuizResultsProps) {
           {t.results.chooseAnother}
         </button>
       </div>
+      {reviewHref && (
+        <div className="text-center">
+          <Link
+            href={reviewHref}
+            className="text-sm font-medium text-blue-600 hover:underline dark:text-blue-400"
+          >
+            {t.results.openReview}
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

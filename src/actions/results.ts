@@ -13,6 +13,7 @@ type RawResult = {
   total: number;
   time: number;
   mistakes: unknown;
+  level: number | null;
   createdAt: Date;
 };
 
@@ -28,7 +29,11 @@ function attachModule<T extends { moduleId: string }>(result: T) {
   };
 }
 
-export async function saveResult(moduleId: string, result: QuizResult) {
+export async function saveResult(
+  moduleId: string,
+  result: QuizResult,
+  level?: number
+) {
   const session = await requireAuth();
 
   return prisma.result.create({
@@ -40,6 +45,7 @@ export async function saveResult(moduleId: string, result: QuizResult) {
       time: result.time,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       mistakes: result.mistakes as any,
+      level: level ?? null,
     },
   });
 }

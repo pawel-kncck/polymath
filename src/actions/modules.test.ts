@@ -131,5 +131,19 @@ describe('modules actions (content-loader backed)', () => {
       const m = await getModuleWithRandomItems('english-plurals', 999);
       expect(m?.items).toHaveLength(10);
     });
+
+    it('filters items by level when a level is supplied', async () => {
+      const m = await getModuleWithRandomItems('fractions-expanding', 5, 2);
+      expect(m).not.toBeNull();
+      expect(m?.items).toHaveLength(5);
+      for (const item of m!.items) {
+        expect(item.level).toBe(2);
+      }
+    });
+
+    it('returns an empty list when no items match the requested level', async () => {
+      const m = await getModuleWithRandomItems('fractions-expanding', 5, 99);
+      expect(m?.items).toEqual([]);
+    });
   });
 });

@@ -11,12 +11,14 @@ import type { QuizItem, QuizResult } from '@/types/quiz';
 interface QuizClientProps {
   moduleId: string;
   items: QuizItem[];
+  level?: number;
 }
 
-export function QuizClient({ moduleId, items }: QuizClientProps) {
+export function QuizClient({ moduleId, items, level }: QuizClientProps) {
   const router = useRouter();
   const t = useT();
   const [result, setResult] = useState<QuizResult | null>(null);
+  const [savedResultId, setSavedResultId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [key, setKey] = useState(0);
 
@@ -25,7 +27,8 @@ export function QuizClient({ moduleId, items }: QuizClientProps) {
     setIsSaving(true);
 
     try {
-      await saveResult(moduleId, quizResult);
+      const saved = await saveResult(moduleId, quizResult, level);
+      setSavedResultId(saved.id);
     } catch (error) {
       console.error('Failed to save result:', error);
     } finally {
@@ -35,7 +38,14 @@ export function QuizClient({ moduleId, items }: QuizClientProps) {
 
   const handleRetry = () => {
     setResult(null);
+    setSavedResultId(null);
+    // Always remount QuizRunner so useQuiz state reinitializes. For leveled
+    // modules also kick a server round-trip so the items prop is re-sampled
+    // from the level pool.
     setKey((prev) => prev + 1);
+    if (level !== undefined) {
+      router.refresh();
+    }
   };
 
   const handleBack = () => {
@@ -45,7 +55,12 @@ export function QuizClient({ moduleId, items }: QuizClientProps) {
   return (
     <div>
       {result ? (
-        <QuizResults result={result} onRetry={handleRetry} onBack={handleBack} />
+        <QuizResults
+          result={result}
+          onRetry={handleRetry}
+          onBack={handleBack}
+          reviewHref={savedResultId ? `/progress/${savedResultId}` : null}
+        />
       ) : (
         <QuizRunner
           key={key}

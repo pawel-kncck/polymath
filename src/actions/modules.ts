@@ -29,16 +29,22 @@ export async function getModuleById(id: string) {
 }
 
 /**
- * Return a module with a randomly ordered (optionally truncated) item list.
+ * Return a module with a randomly ordered (optionally truncated, optionally
+ * level-filtered) item list. When `level` is provided, only items matching
+ * that level are considered before sampling.
  */
 export async function getModuleWithRandomItems(
   moduleId: string,
-  count?: number
+  count?: number,
+  level?: number
 ) {
   const m = getContentModule(moduleId);
   if (!m) return null;
 
-  const shuffled = [...m.items];
+  const pool =
+    level !== undefined ? m.items.filter((i) => i.level === level) : m.items;
+
+  const shuffled = [...pool];
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];

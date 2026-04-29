@@ -6,6 +6,8 @@ import { QuizProgress } from './QuizProgress';
 import { QuizInput } from './QuizInput';
 import { TextRenderer } from '@/components/renderers/TextRenderer';
 import { SingleChoiceRenderer } from '@/components/renderers/SingleChoiceRenderer';
+import { FractionExpandRenderer } from '@/components/renderers/FractionExpandRenderer';
+import { FractionSimplifyRenderer } from '@/components/renderers/FractionSimplifyRenderer';
 import type { QuizItem, QuizResult } from '@/types/quiz';
 
 interface QuizRunnerProps {
@@ -61,6 +63,26 @@ export function QuizRunner({ items, onComplete, onExit }: QuizRunnerProps) {
             selectedValue={userAnswer}
             feedback={feedback}
             onSelect={(option) => submitAnswer(option)}
+          />
+        );
+      case 'FRACTION_EXPAND':
+        return (
+          <FractionExpandRenderer
+            key={currentItem.id}
+            itemId={currentItem.id}
+            content={currentItem.content}
+            feedback={feedback}
+            onSubmit={(answer) => submitAnswer(answer)}
+          />
+        );
+      case 'FRACTION_SIMPLIFY':
+        return (
+          <FractionSimplifyRenderer
+            key={currentItem.id}
+            itemId={currentItem.id}
+            content={currentItem.content}
+            feedback={feedback}
+            onSubmit={(answer) => submitAnswer(answer)}
           />
         );
       case 'MATH_EQ':
@@ -120,6 +142,13 @@ export function QuizRunner({ items, onComplete, onExit }: QuizRunnerProps) {
       {currentItem.type === 'SINGLE_CHOICE' && (
         <div className="text-center text-sm text-gray-500">
           <p>{t.quiz.clickOptionToSubmit}</p>
+        </div>
+      )}
+
+      {(currentItem.type === 'FRACTION_EXPAND' ||
+        currentItem.type === 'FRACTION_SIMPLIFY') && (
+        <div className="text-center text-sm text-gray-500">
+          <p>{t.quiz.pressEnterToSubmit}</p>
         </div>
       )}
     </div>

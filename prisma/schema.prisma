@@ -82,6 +82,7 @@ model Result {
   total     Int
   time      Int      // seconds
   mistakes  Json     // array of mistake details (prompt/answer denormalized at save time)
+  level     Int?     // difficulty bucket for leveled modules (e.g. fractions); null otherwise
   createdAt DateTime @default(now())
   userId    String
   moduleId  String

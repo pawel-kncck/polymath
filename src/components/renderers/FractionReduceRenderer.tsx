@@ -1,26 +1,26 @@
 'use client';
 
 import { useT } from '@/i18n/provider';
-import type { FractionExpandContent } from '@/types/content';
+import type { FractionReduceContent } from '@/types/content';
 import {
   FractionInputs,
   StackedFraction,
   useFractionAnswer,
 } from './FractionInputs';
 
-interface FractionExpandRendererProps {
+interface FractionReduceRendererProps {
   itemId: string;
   content: unknown;
   feedback: 'correct' | 'incorrect' | null;
   onSubmit: (answer: string) => void;
 }
 
-export function FractionExpandRenderer({
+export function FractionReduceRenderer({
   itemId,
   content,
   feedback,
   onSubmit,
-}: FractionExpandRendererProps) {
+}: FractionReduceRendererProps) {
   const t = useT();
   const {
     numerator,
@@ -38,7 +38,7 @@ export function FractionExpandRenderer({
     );
   }
 
-  const c = content as FractionExpandContent;
+  const c = content as FractionReduceContent;
 
   return (
     <div className="flex flex-col items-center justify-center space-y-6 py-6">
@@ -46,11 +46,15 @@ export function FractionExpandRenderer({
         {c.instruction}
       </p>
 
-      {/* The connector is the localized word for "by" ("przez" / "by") rather
-          than × — expanding multiplies BOTH parts of the fraction, not the
-          value, and an "×" reads as scalar multiplication. */}
+      {/* "przez" / "by" instead of ÷ — same wording as the expand renderer.
+          The student reads the operation as "skróć ułamek przez 2" / "reduce
+          the fraction by 2". */}
       <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-3 text-gray-900 dark:text-gray-100">
-        <StackedFraction numerator={c.numerator} denominator={c.denominator} />
+        <StackedFraction
+          numerator={c.numerator}
+          denominator={c.denominator}
+          size="lg"
+        />
         <span className="text-xl font-medium">{t.fractions.byWord}</span>
         <span className="text-3xl font-bold">{c.factor}</span>
         <span className="text-3xl font-bold">=</span>

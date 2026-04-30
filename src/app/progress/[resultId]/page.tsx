@@ -7,8 +7,10 @@ import { getLocale, getMessages } from '@/i18n/server';
 import { format } from '@/i18n/format';
 import { resolveLocalized } from '@/lib/localize';
 import { MistakesList } from '@/components/quiz/MistakesList';
+import { ResponsesList } from '@/components/quiz/ResponsesList';
+import { AppShell } from '@/components/shell/AppShell';
 import type { Locale } from '@/i18n/config';
-import type { MistakeDetail } from '@/types/quiz';
+import type { MistakeDetail, ResponseDetail } from '@/types/quiz';
 
 interface ReviewPageProps {
   params: Promise<{ resultId: string }>;
@@ -50,24 +52,22 @@ export default async function ReviewPage({ params }: ReviewPageProps) {
   const mistakes = (Array.isArray(result.mistakes)
     ? result.mistakes
     : []) as MistakeDetail[];
+  // New rows carry a denormalized log of every question answered. Legacy
+  // rows only have `mistakes` — fall back to that view when responses is
+  // missing so the history page still works for old tests.
+  const responses = (Array.isArray(result.responses)
+    ? result.responses
+    : null) as ResponseDetail[] | null;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <header className="border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-800">
-        <div className="container mx-auto flex items-center justify-between px-4 py-4">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-            {t.common.appName}
-          </h1>
-          <Link
-            href="/progress"
-            className="text-sm text-gray-600 hover:underline dark:text-gray-400"
-          >
-            {t.progress.backToHistory}
-          </Link>
-        </div>
-      </header>
-
-      <main className="container mx-auto max-w-2xl space-y-8 px-4 py-8">
+    <AppShell active="progress">
+      <main className="container mx-auto max-w-2xl space-y-8 px-6 py-8">
+        <Link
+          href="/progress"
+          className="text-sm text-gray-600 hover:underline dark:text-gray-400"
+        >
+          {t.progress.backToHistory}
+        </Link>
         <div className="rounded-lg bg-white p-8 shadow-sm dark:bg-gray-800">
           <h2 className="mb-2 text-2xl font-bold text-gray-900 dark:text-gray-100">
             {title}
@@ -111,11 +111,17 @@ export default async function ReviewPage({ params }: ReviewPageProps) {
 
         <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
           <h3 className="mb-4 text-xl font-bold text-gray-900 dark:text-gray-100">
-            {mistakes.length === 0
-              ? t.progress.reviewNoMistakes
-              : format(t.progress.reviewMistakeCount, { n: mistakes.length })}
+            {responses
+              ? t.progress.reviewAllQuestions
+              : mistakes.length === 0
+                ? t.progress.reviewNoMistakes
+                : format(t.progress.reviewMistakeCount, {
+                    n: mistakes.length,
+                  })}
           </h3>
-          {mistakes.length > 0 ? (
+          {responses ? (
+            <ResponsesList responses={responses} />
+          ) : mistakes.length > 0 ? (
             <MistakesList mistakes={mistakes} />
           ) : (
             <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -124,6 +130,6 @@ export default async function ReviewPage({ params }: ReviewPageProps) {
           )}
         </div>
       </main>
-    </div>
+    </AppShell>
   );
 }

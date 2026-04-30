@@ -2,29 +2,17 @@
 
 import { useT } from '@/i18n/provider';
 import type { FractionSimplifyContent } from '@/types/content';
-import { FractionInputs, useFractionAnswer } from './FractionInputs';
+import {
+  FractionInputs,
+  StackedFraction,
+  useFractionAnswer,
+} from './FractionInputs';
 
 interface FractionSimplifyRendererProps {
   itemId: string;
   content: unknown;
   feedback: 'correct' | 'incorrect' | null;
   onSubmit: (answer: string) => void;
-}
-
-function StackedFraction({
-  numerator,
-  denominator,
-}: {
-  numerator: number | string;
-  denominator: number | string;
-}) {
-  return (
-    <div className="inline-flex flex-col items-center px-2 align-middle">
-      <span className="text-4xl font-bold leading-none">{numerator}</span>
-      <span className="my-1 block h-0.5 w-16 bg-gray-800 dark:bg-gray-200" />
-      <span className="text-4xl font-bold leading-none">{denominator}</span>
-    </div>
-  );
 }
 
 export function FractionSimplifyRenderer({
@@ -59,7 +47,11 @@ export function FractionSimplifyRenderer({
       </p>
 
       <div className="flex items-center gap-6 text-gray-900 dark:text-gray-100">
-        <StackedFraction numerator={c.numerator} denominator={c.denominator} />
+        <StackedFraction
+          numerator={c.numerator}
+          denominator={c.denominator}
+          size="lg"
+        />
         <span className="text-3xl font-bold">=</span>
         <FractionInputs
           numerator={numerator}

@@ -60,3 +60,17 @@ export interface FractionSimplifyContent {
   answer: string;
   instruction: string;
 }
+
+/**
+ * Content type for FRACTION_REDUCE items (divide numerator + denominator by
+ * `factor`). Unlike SIMPLIFY, the result is not necessarily in lowest terms —
+ * the student is told exactly which factor to divide by.
+ */
+export interface FractionReduceContent {
+  numerator: number;
+  denominator: number;
+  factor: number;
+  // Computed at content build time: `${numerator/factor}/${denominator/factor}`.
+  answer: string;
+  instruction: string;
+}

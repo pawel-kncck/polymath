@@ -5,8 +5,10 @@ import { format } from '@/i18n/format';
 import {
   deleteUser,
   resetUserPassword,
+  setUserModuleAccess,
   type DeleteUserState,
   type ResetPasswordState,
+  type SetModuleAccessState,
 } from './actions';
 
 type Labels = {
@@ -23,17 +25,38 @@ type Labels = {
   resetPasswordSuccessTemplate: string;
   errorPasswordTooShort: string;
   errorUnknown: string;
+  manageAccess: string;
+  manageAccessTitleTemplate: string;
+  selectAll: string;
+  selectNone: string;
+  saveAccess: string;
+  cancelAccess: string;
+  noModules: string;
+  accessSavedTemplate: string;
 };
+
+export interface AccessModule {
+  id: string;
+  title: string;
+  category: string;
+  categoryLabel: string;
+}
 
 export function UserActions({
   userId,
   email,
   isSelf,
+  role,
+  accessibleModuleIds,
+  modulesForAccess,
   labels,
 }: {
   userId: string;
   email: string;
   isSelf: boolean;
+  role: string;
+  accessibleModuleIds: string[];
+  modulesForAccess: AccessModule[];
   labels: Labels;
 }) {
   const [deleteState, deleteAction, isDeleting] = useActionState<
@@ -44,9 +67,20 @@ export function UserActions({
     ResetPasswordState,
     FormData
   >(resetUserPassword, null);
+  const [accessState, accessAction, isSavingAccess] = useActionState<
+    SetModuleAccessState,
+    FormData
+  >(setUserModuleAccess, null);
 
   const [resetOpen, setResetOpen] = useState(false);
+  const [accessOpen, setAccessOpen] = useState(false);
   const resetFormRef = useRef<HTMLFormElement>(null);
+
+  // Local checkbox state — initialized from the server prop, then mutated by
+  // the user. Saved as a hidden moduleId[] when they hit Save.
+  const [checked, setChecked] = useState<Set<string>>(
+    () => new Set(accessibleModuleIds)
+  );
 
   useEffect(() => {
     if (resetState?.success) {
@@ -54,6 +88,10 @@ export function UserActions({
       resetFormRef.current?.reset();
     }
   }, [resetState]);
+
+  useEffect(() => {
+    if (accessState?.success) setAccessOpen(false);
+  }, [accessState]);
 
   const deleteErrorMessage =
     deleteState?.error === 'delete_self'
@@ -69,6 +107,19 @@ export function UserActions({
         ? labels.errorUnknown
         : null;
 
+  // Group modules by category for the checkbox grid.
+  const groupedAccess = modulesForAccess.reduce<
+    Map<string, { categoryLabel: string; modules: AccessModule[] }>
+  >((acc, m) => {
+    const entry = acc.get(m.category) ?? {
+      categoryLabel: m.categoryLabel,
+      modules: [],
+    };
+    entry.modules.push(m);
+    acc.set(m.category, entry);
+    return acc;
+  }, new Map());
+
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-wrap gap-2">
@@ -79,6 +130,16 @@ export function UserActions({
         >
           {labels.resetPassword}
         </button>
+
+        {role !== 'ADMIN' && (
+          <button
+            type="button"
+            onClick={() => setAccessOpen((v) => !v)}
+            className="rounded-md border border-gray-300 px-2 py-1 text-xs font-medium text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+          >
+            {labels.manageAccess}
+          </button>
+        )}
 
         <form
           action={deleteAction}
@@ -99,10 +160,7 @@ export function UserActions({
       </div>
 
       {deleteErrorMessage && (
-        <p
-          role="alert"
-          className="text-xs text-red-600 dark:text-red-400"
-        >
+        <p role="alert" className="text-xs text-red-600 dark:text-red-400">
           {deleteErrorMessage}
         </p>
       )}
@@ -133,10 +191,7 @@ export function UserActions({
             {labels.passwordHint}
           </p>
           {resetErrorMessage && (
-            <p
-              role="alert"
-              className="mb-2 text-xs text-red-600 dark:text-red-400"
-            >
+            <p role="alert" className="mb-2 text-xs text-red-600 dark:text-red-400">
               {resetErrorMessage}
             </p>
           )}
@@ -159,13 +214,118 @@ export function UserActions({
         </form>
       )}
 
-      {resetState?.success && resetState.targetEmail && (
-        <p
-          role="status"
-          className="text-xs text-green-600 dark:text-green-400"
+      {accessOpen && (
+        <form
+          action={accessAction}
+          className="rounded-md border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-900"
         >
+          <input type="hidden" name="userId" value={userId} />
+          <p className="mb-2 text-xs font-medium text-gray-700 dark:text-gray-300">
+            {format(labels.manageAccessTitleTemplate, { email })}
+          </p>
+
+          {modulesForAccess.length === 0 ? (
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {labels.noModules}
+            </p>
+          ) : (
+            <>
+              <div className="mb-2 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setChecked(new Set(modulesForAccess.map((m) => m.id)))
+                  }
+                  className="rounded-md border border-gray-300 px-2 py-0.5 text-[11px] text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                >
+                  {labels.selectAll}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setChecked(new Set())}
+                  className="rounded-md border border-gray-300 px-2 py-0.5 text-[11px] text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                >
+                  {labels.selectNone}
+                </button>
+              </div>
+
+              <div className="mb-3 max-h-80 space-y-3 overflow-y-auto pr-1">
+                {Array.from(groupedAccess.entries()).map(
+                  ([category, { categoryLabel, modules }]) => (
+                    <fieldset key={category}>
+                      <legend className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                        {categoryLabel}
+                      </legend>
+                      <div className="space-y-1">
+                        {modules.map((m) => (
+                          <label
+                            key={m.id}
+                            className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-300"
+                          >
+                            <input
+                              type="checkbox"
+                              name="moduleId"
+                              value={m.id}
+                              checked={checked.has(m.id)}
+                              onChange={(e) => {
+                                setChecked((prev) => {
+                                  const next = new Set(prev);
+                                  if (e.target.checked) next.add(m.id);
+                                  else next.delete(m.id);
+                                  return next;
+                                });
+                              }}
+                              className="h-3 w-3"
+                            />
+                            <span>{m.title}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </fieldset>
+                  )
+                )}
+              </div>
+            </>
+          )}
+
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              disabled={isSavingAccess}
+              className="rounded-md bg-zinc-900 px-2 py-1 text-xs font-medium text-white hover:bg-zinc-800 disabled:opacity-60 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
+            >
+              {labels.saveAccess}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setAccessOpen(false);
+                setChecked(new Set(accessibleModuleIds));
+              }}
+              className="rounded-md border border-gray-300 px-2 py-1 text-xs font-medium text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+            >
+              {labels.cancelAccess}
+            </button>
+          </div>
+          {accessState?.error && (
+            <p role="alert" className="mt-2 text-xs text-red-600 dark:text-red-400">
+              {labels.errorUnknown}
+            </p>
+          )}
+        </form>
+      )}
+
+      {resetState?.success && resetState.targetEmail && (
+        <p role="status" className="text-xs text-green-600 dark:text-green-400">
           {format(labels.resetPasswordSuccessTemplate, {
             email: resetState.targetEmail,
+          })}
+        </p>
+      )}
+      {accessState?.success && accessState.targetEmail && (
+        <p role="status" className="text-xs text-green-600 dark:text-green-400">
+          {format(labels.accessSavedTemplate, {
+            email: accessState.targetEmail,
           })}
         </p>
       )}

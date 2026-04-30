@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import { revalidatePath } from 'next/cache';
 import { requireAdmin } from '@/lib/auth-utils';
 import { prisma } from '@/lib/db';
+import { getAllContentModules } from '@/content';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_PASSWORD_LENGTH = 8;
@@ -135,6 +136,51 @@ export async function resetUserPassword(
     const updated = await prisma.user.update({
       where: { id: userId },
       data: { passwordHash },
+      select: { email: true },
+    });
+    revalidatePath('/admin/users');
+    return { success: true, targetEmail: updated.email };
+  } catch {
+    return { error: 'unknown' };
+  }
+}
+
+// ─── Module access ────────────────────────────────────────────────────────────
+
+export type SetModuleAccessState = {
+  error?: 'not_found' | 'unknown';
+  success?: true;
+  targetEmail?: string;
+} | null;
+
+/**
+ * Replace a user's accessible-module allow-list. The admin sends the full
+ * list (not a delta) so the server simply overwrites the column. Unknown
+ * module ids are silently dropped — content can be removed from the repo
+ * between admin loads, and we don't want a stale checkbox to fail the save.
+ */
+export async function setUserModuleAccess(
+  _prevState: SetModuleAccessState,
+  formData: FormData
+): Promise<SetModuleAccessState> {
+  await requireAdmin();
+
+  const userId =
+    typeof formData.get('userId') === 'string'
+      ? (formData.get('userId') as string)
+      : '';
+  if (!userId) return { error: 'not_found' };
+
+  const submittedIds = formData.getAll('moduleId').filter(
+    (v): v is string => typeof v === 'string'
+  );
+  const knownIds = new Set(getAllContentModules().map((m) => m.id));
+  const validIds = Array.from(new Set(submittedIds.filter((id) => knownIds.has(id))));
+
+  try {
+    const updated = await prisma.user.update({
+      where: { id: userId },
+      data: { accessibleModuleIds: validIds },
       select: { email: true },
     });
     revalidatePath('/admin/users');

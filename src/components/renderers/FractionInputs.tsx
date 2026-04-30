@@ -3,6 +3,30 @@
 import { useEffect, useRef, useState } from 'react';
 import { useT } from '@/i18n/provider';
 
+/**
+ * Shared visual: numerator stacked over denominator with a horizontal bar.
+ * Used by every fraction renderer's "presented" side.
+ */
+export function StackedFraction({
+  numerator,
+  denominator,
+  size = 'md',
+}: {
+  numerator: number | string;
+  denominator: number | string;
+  size?: 'md' | 'lg';
+}) {
+  const text = size === 'lg' ? 'text-4xl' : 'text-3xl';
+  const bar = size === 'lg' ? 'w-16' : 'w-12';
+  return (
+    <div className="inline-flex flex-col items-center px-2 align-middle">
+      <span className={`${text} font-bold leading-none`}>{numerator}</span>
+      <span className={`my-1 block h-0.5 ${bar} bg-gray-800 dark:bg-gray-200`} />
+      <span className={`${text} font-bold leading-none`}>{denominator}</span>
+    </div>
+  );
+}
+
 interface FractionInputsProps {
   numerator: string;
   denominator: string;

@@ -1,7 +1,12 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
-import type { QuizItem, QuizResult, MistakeDetail } from '@/types/quiz';
+import { useCallback, useRef, useState } from 'react';
+import type {
+  QuizItem,
+  QuizResult,
+  MistakeDetail,
+  ResponseDetail,
+} from '@/types/quiz';
 
 type FeedbackState = 'correct' | 'incorrect' | null;
 
@@ -10,13 +15,38 @@ interface UseQuizOptions {
   onComplete: (result: QuizResult) => void;
 }
 
+const FEEDBACK_DELAY_MS = 800;
+
+function normalize(answer: string): string {
+  return answer.trim().toLowerCase();
+}
+
+function getCorrectAnswer(item: QuizItem): string {
+  return (item.content as { answer: string }).answer;
+}
+
+function getPrompt(item: QuizItem): string {
+  const content = item.content as { prompt?: string; instruction?: string };
+  return content.prompt || content.instruction || '';
+}
+
 export function useQuiz({ items, onComplete }: UseQuizOptions) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [userAnswer, setUserAnswer] = useState('');
+  const [userAnswer, setUserAnswerState] = useState('');
   const [feedback, setFeedback] = useState<FeedbackState>(null);
-  const [mistakes, setMistakes] = useState<MistakeDetail[]>([]);
+  const [responses, setResponses] = useState<ResponseDetail[]>([]);
   const [startTime] = useState(() => Date.now());
   const [isComplete, setIsComplete] = useState(false);
+
+  // Keep a synchronous mirror of userAnswer so submitAnswer can see the
+  // latest value even when callers call setUserAnswer + submitAnswer in the
+  // same render batch (the ref updates immediately; React state would not
+  // flush until after the batch).
+  const userAnswerRef = useRef('');
+  const setUserAnswer = useCallback((v: string) => {
+    userAnswerRef.current = v;
+    setUserAnswerState(v);
+  }, []);
 
   const currentItem = items[currentIndex];
   const progress = {
@@ -25,119 +55,78 @@ export function useQuiz({ items, onComplete }: UseQuizOptions) {
   };
 
   /**
-   * Normalize answer for comparison (case-insensitive, trimmed)
-   */
-  const normalizeAnswer = (answer: string): string => {
-    return answer.trim().toLowerCase();
-  };
-
-  /**
-   * Get the correct answer from the current item's content
-   */
-  const getCorrectAnswer = useCallback((item: QuizItem): string => {
-    const content = item.content as { answer: string };
-    return content.answer;
-  }, []);
-
-  /**
-   * Get the prompt from the current item's content
-   */
-  const getPrompt = useCallback((item: QuizItem): string => {
-    const content = item.content as { prompt?: string; instruction?: string };
-    return content.prompt || content.instruction || '';
-  }, []);
-
-  /**
-   * Check if the user's answer is correct
-   */
-  const checkAnswer = useCallback(
-    (answer: string): boolean => {
-      const correctAnswer = getCorrectAnswer(currentItem);
-      return normalizeAnswer(answer) === normalizeAnswer(correctAnswer);
-    },
-    [currentItem, getCorrectAnswer]
-  );
-
-  /**
    * Submit the current answer. Pass an override to submit a value directly
-   * without waiting for setUserAnswer to flush (e.g. click-to-submit renderers).
+   * without waiting for setUserAnswer to flush (e.g. click-to-submit
+   * renderers). Records the question in the responses log either way.
    */
-  const submitAnswer = useCallback((overrideAnswer?: string) => {
-    const answer = overrideAnswer ?? userAnswer;
-    if (!answer.trim() || feedback !== null) return;
+  const submitAnswer = useCallback(
+    (overrideAnswer?: string) => {
+      const answer = overrideAnswer ?? userAnswerRef.current;
+      if (!answer.trim() || feedback !== null) return;
 
-    if (overrideAnswer !== undefined) {
-      setUserAnswer(overrideAnswer);
-    }
+      if (overrideAnswer !== undefined) setUserAnswer(overrideAnswer);
 
-    const isCorrect = checkAnswer(answer);
-    setFeedback(isCorrect ? 'correct' : 'incorrect');
-
-    // Record mistake if incorrect
-    if (!isCorrect) {
       const correctAnswer = getCorrectAnswer(currentItem);
-      const prompt = getPrompt(currentItem);
+      const isCorrect = normalize(answer) === normalize(correctAnswer);
+      setFeedback(isCorrect ? 'correct' : 'incorrect');
 
-      setMistakes((prev) => [
-        ...prev,
-        {
-          itemId: currentItem.id,
-          prompt,
-          correctAnswer,
-          userAnswer: answer.trim(),
-        },
-      ]);
-    }
+      const response: ResponseDetail = {
+        itemId: currentItem.id,
+        prompt: getPrompt(currentItem),
+        correctAnswer,
+        userAnswer: answer.trim(),
+        correct: isCorrect,
+      };
+      // Build the up-to-date list once so both the next-question setTimeout
+      // and the completion branch see the same data.
+      const nextResponses = [...responses, response];
+      setResponses(nextResponses);
 
-    // Move to next question after delay
-    setTimeout(() => {
-      if (currentIndex < items.length - 1) {
-        setCurrentIndex((prev) => prev + 1);
-        setUserAnswer('');
-        setFeedback(null);
-      } else {
-        // Quiz complete
+      setTimeout(() => {
+        if (currentIndex < items.length - 1) {
+          setCurrentIndex((prev) => prev + 1);
+          setUserAnswer('');
+          setFeedback(null);
+          return;
+        }
+
         const timeElapsed = Math.floor((Date.now() - startTime) / 1000);
-        const score = items.length - (isCorrect ? mistakes.length : mistakes.length + 1);
+        const score = nextResponses.filter((r) => r.correct).length;
+        const mistakes: MistakeDetail[] = nextResponses
+          .filter((r) => !r.correct)
+          .map(({ itemId, prompt, correctAnswer, userAnswer }) => ({
+            itemId,
+            prompt,
+            correctAnswer,
+            userAnswer,
+          }));
 
-        const result: QuizResult = {
+        setIsComplete(true);
+        onComplete({
           score,
           total: items.length,
           time: timeElapsed,
-          mistakes: isCorrect ? mistakes : [...mistakes, {
-            itemId: currentItem.id,
-            prompt: getPrompt(currentItem),
-            correctAnswer: getCorrectAnswer(currentItem),
-            userAnswer: answer.trim(),
-          }],
-        };
+          mistakes,
+          responses: nextResponses,
+        });
+      }, FEEDBACK_DELAY_MS);
+    },
+    [
+      feedback,
+      currentItem,
+      currentIndex,
+      items.length,
+      responses,
+      startTime,
+      onComplete,
+    ]
+  );
 
-        setIsComplete(true);
-        onComplete(result);
-      }
-    }, 800);
-  }, [
-    userAnswer,
-    feedback,
-    checkAnswer,
-    currentItem,
-    currentIndex,
-    items.length,
-    mistakes,
-    startTime,
-    onComplete,
-    getCorrectAnswer,
-    getPrompt,
-  ]);
-
-  /**
-   * Reset quiz to start over
-   */
   const reset = useCallback(() => {
     setCurrentIndex(0);
     setUserAnswer('');
     setFeedback(null);
-    setMistakes([]);
+    setResponses([]);
     setIsComplete(false);
   }, []);
 

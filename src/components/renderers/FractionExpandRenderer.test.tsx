@@ -17,11 +17,11 @@ const sampleContent = {
   denominator: 3,
   factor: 4,
   answer: '8/12',
-  instruction: 'Expand the fraction 2/3 by a factor of 4',
+  instruction: 'Expand the fraction by a number',
 };
 
 describe('FractionExpandRenderer', () => {
-  it('renders the instruction and the source fraction', () => {
+  it('renders the instruction and the source fraction (no × symbol)', () => {
     renderWithI18n(
       <FractionExpandRenderer
         itemId="fx-1"
@@ -31,12 +31,17 @@ describe('FractionExpandRenderer', () => {
       />
     );
     expect(
-      screen.getByText('Expand the fraction 2/3 by a factor of 4')
+      screen.getByText('Expand the fraction by a number')
     ).toBeInTheDocument();
     expect(screen.getByText('2')).toBeInTheDocument();
     expect(screen.getByText('3')).toBeInTheDocument();
-    expect(screen.getByText('×')).toBeInTheDocument();
+    // Operation row: "2/3 by 4 =" — connector word + factor visible.
+    expect(screen.getByText('by')).toBeInTheDocument();
     expect(screen.getByText('4')).toBeInTheDocument();
+    // The × multiplication sign is intentionally absent — expanding multiplies
+    // both parts of the fraction, not its value, and × reads as scalar
+    // multiplication. We use the word "by" / "przez" instead.
+    expect(screen.queryByText('×')).not.toBeInTheDocument();
   });
 
   it('disables submit until both inputs are filled', () => {

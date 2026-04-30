@@ -58,6 +58,7 @@ export const pl = {
     reviewMistakeCount: 'Błędy do przejrzenia ({n})',
     reviewNoMistakes: 'Brak błędów',
     reviewPerfectHint: 'Bezbłędnie! Wszystkie odpowiedzi były poprawne.',
+    reviewAllQuestions: 'Wszystkie pytania z testu',
   },
   quiz: {
     questionOf: 'Pytanie {current} z {total}',
@@ -83,10 +84,26 @@ export const pl = {
     yourAnswer: 'Twoja odpowiedź',
     correctAnswer: 'Poprawna odpowiedź',
     questionNumber: 'Pytanie {n}',
+    correctTag: 'Poprawnie',
     tryAgain: 'Nowy test',
     chooseAnother: 'Wybierz inny moduł',
     savingResult: 'Zapisywanie wyniku...',
     openReview: 'Zobacz w historii',
+  },
+  shell: {
+    domains: 'Dziedziny',
+    activity: 'Aktywność',
+    noAccess: 'Brak dostępu do żadnych modułów. Skontaktuj się z administratorem.',
+    noAccessTitle: 'Brak dostępu do modułów',
+    noAccessHint: 'Twój administrator nie przyznał Ci jeszcze żadnych modułów. Daj mu znać, że chcesz zacząć.',
+    noModulesInDomain: 'Brak modułów w tej dziedzinie.',
+    statAttempts: 'Podejścia',
+    statAvgScore: 'Średni wynik',
+    statAvgTime: 'Średni czas',
+    secondsShort: '{n}s',
+    noAttemptsYet: 'Brak ukończonych testów.',
+    openMenu: 'Otwórz menu',
+    closeMenu: 'Zamknij menu',
   },
   fractions: {
     chooseLevelTitle: 'Wybierz poziom trudności',
@@ -97,6 +114,10 @@ export const pl = {
     numeratorLabel: 'Licznik',
     denominatorLabel: 'Mianownik',
     submitAnswer: 'Sprawdź',
+    // Word that connects the source fraction to the factor in the equation
+    // row — replaces the × / ÷ symbols ("przez 4" reads naturally for both
+    // expansion and reduction in Polish).
+    byWord: 'przez',
   },
   admin: {
     backToHome: '← Wróć do strony głównej',
@@ -132,6 +153,14 @@ export const pl = {
     resetPasswordSubmit: 'Ustaw nowe hasło',
     resetPasswordCancel: 'Anuluj',
     resetPasswordSuccess: 'Zaktualizowano hasło dla {email}.',
+    manageAccess: 'Zarządzaj dostępem',
+    manageAccessTitle: 'Dostęp do modułów dla {email}',
+    selectAll: 'Zaznacz wszystkie',
+    selectNone: 'Wyczyść',
+    saveAccess: 'Zapisz dostęp',
+    cancelAccess: 'Anuluj',
+    noModules: 'Brak modułów do zarządzania.',
+    accessSaved: 'Zapisano dostęp dla {email}.',
   },
 };
 

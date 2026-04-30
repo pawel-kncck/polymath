@@ -25,6 +25,9 @@ model User {
   image         String?
   passwordHash  String?
   role          String    @default("STUDENT") // "ADMIN" or "STUDENT"
+  // Per-user allow-list of module ids the student can access. Admins bypass
+  // this check entirely. Empty array = no modules visible (admin must grant).
+  accessibleModuleIds String[]  @default([])
   accounts      Account[]
   sessions      Session[]
   results       Result[]
@@ -82,6 +85,10 @@ model Result {
   total     Int
   time      Int      // seconds
   mistakes  Json     // array of mistake details (prompt/answer denormalized at save time)
+  // Full denormalized response log: every question's prompt + correct answer
+  // + user answer + correctness flag. Stored verbatim so reviews still work
+  // after the source question bank changes. Null on legacy rows.
+  responses Json?
   level     Int?     // difficulty bucket for leveled modules (e.g. fractions); null otherwise
   createdAt DateTime @default(now())
   userId    String

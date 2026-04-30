@@ -17,7 +17,8 @@ const sampleContent = {
   denominator: 3,
   factor: 4,
   answer: '8/12',
-  instruction: 'Expand the fraction by a number',
+  genericInstruction: 'Expand the fraction by a number',
+  specificInstruction: 'Expand 2/3 by 4',
 };
 
 describe('FractionExpandRenderer', () => {

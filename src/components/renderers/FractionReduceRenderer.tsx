@@ -43,7 +43,7 @@ export function FractionReduceRenderer({
   return (
     <div className="flex flex-col items-center justify-center space-y-6 py-6">
       <p className="max-w-xl text-center text-lg text-gray-700 dark:text-gray-300">
-        {c.instruction}
+        {c.genericInstruction}
       </p>
 
       {/* "przez" / "by" instead of ÷ — same wording as the expand renderer.

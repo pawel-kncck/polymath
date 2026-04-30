@@ -8,6 +8,7 @@ import { TextRenderer } from '@/components/renderers/TextRenderer';
 import { SingleChoiceRenderer } from '@/components/renderers/SingleChoiceRenderer';
 import { FractionExpandRenderer } from '@/components/renderers/FractionExpandRenderer';
 import { FractionSimplifyRenderer } from '@/components/renderers/FractionSimplifyRenderer';
+import { FractionReduceRenderer } from '@/components/renderers/FractionReduceRenderer';
 import type { QuizItem, QuizResult } from '@/types/quiz';
 
 interface QuizRunnerProps {
@@ -85,6 +86,16 @@ export function QuizRunner({ items, onComplete, onExit }: QuizRunnerProps) {
             onSubmit={(answer) => submitAnswer(answer)}
           />
         );
+      case 'FRACTION_REDUCE':
+        return (
+          <FractionReduceRenderer
+            key={currentItem.id}
+            itemId={currentItem.id}
+            content={currentItem.content}
+            feedback={feedback}
+            onSubmit={(answer) => submitAnswer(answer)}
+          />
+        );
       case 'MATH_EQ':
         return (
           <div className="text-center text-gray-600">
@@ -146,7 +157,8 @@ export function QuizRunner({ items, onComplete, onExit }: QuizRunnerProps) {
       )}
 
       {(currentItem.type === 'FRACTION_EXPAND' ||
-        currentItem.type === 'FRACTION_SIMPLIFY') && (
+        currentItem.type === 'FRACTION_SIMPLIFY' ||
+        currentItem.type === 'FRACTION_REDUCE') && (
         <div className="text-center text-sm text-gray-500">
           <p>{t.quiz.pressEnterToSubmit}</p>
         </div>

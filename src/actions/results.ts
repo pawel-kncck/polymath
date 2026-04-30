@@ -13,6 +13,7 @@ type RawResult = {
   total: number;
   time: number;
   mistakes: unknown;
+  responses: unknown;
   level: number | null;
   createdAt: Date;
 };
@@ -45,6 +46,8 @@ export async function saveResult(
       time: result.time,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       mistakes: result.mistakes as any,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      responses: result.responses as any,
       level: level ?? null,
     },
   });
@@ -74,15 +77,16 @@ export async function getResultById(resultId: string) {
 export type ModuleProgress = {
   moduleId: string;
   attempts: number;
-  bestScore: number;
-  bestTotal: number;
-  bestPercent: number;
+  avgPercent: number; // 0..1
+  avgTime: number; // average seconds, rounded
   lastAttemptAt: Date;
 };
 
 /**
- * Aggregate the current user's quiz attempts per module. Used by the home
- * page to show completion badges / best score next to each quiz card.
+ * Aggregate the current user's quiz attempts per module. Each module card
+ * surfaces attempts / average score / average time, since a module can be
+ * taken many times across different difficulty levels — a single "best
+ * score" badge would mix those buckets and mislead.
  */
 export async function getUserModuleProgress(): Promise<
   Record<string, ModuleProgress>
@@ -95,39 +99,55 @@ export async function getUserModuleProgress(): Promise<
       moduleId: true,
       score: true,
       total: true,
+      time: true,
       createdAt: true,
     },
   })) as Array<{
     moduleId: string;
     score: number;
     total: number;
+    time: number;
     createdAt: Date;
   }>;
 
-  const byModule: Record<string, ModuleProgress> = {};
+  type Accumulator = {
+    moduleId: string;
+    attempts: number;
+    sumPercent: number;
+    sumTime: number;
+    lastAttemptAt: Date;
+  };
+  const acc: Record<string, Accumulator> = {};
   for (const r of results) {
     const percent = r.total > 0 ? r.score / r.total : 0;
-    const existing = byModule[r.moduleId];
+    const existing = acc[r.moduleId];
     if (!existing) {
-      byModule[r.moduleId] = {
+      acc[r.moduleId] = {
         moduleId: r.moduleId,
         attempts: 1,
-        bestScore: r.score,
-        bestTotal: r.total,
-        bestPercent: percent,
+        sumPercent: percent,
+        sumTime: r.time,
         lastAttemptAt: r.createdAt,
       };
       continue;
     }
     existing.attempts += 1;
-    if (percent > existing.bestPercent) {
-      existing.bestScore = r.score;
-      existing.bestTotal = r.total;
-      existing.bestPercent = percent;
-    }
+    existing.sumPercent += percent;
+    existing.sumTime += r.time;
     if (r.createdAt > existing.lastAttemptAt) {
       existing.lastAttemptAt = r.createdAt;
     }
   }
-  return byModule;
+
+  const out: Record<string, ModuleProgress> = {};
+  for (const [moduleId, a] of Object.entries(acc)) {
+    out[moduleId] = {
+      moduleId,
+      attempts: a.attempts,
+      avgPercent: a.sumPercent / a.attempts,
+      avgTime: Math.round(a.sumTime / a.attempts),
+      lastAttemptAt: a.lastAttemptAt,
+    };
+  }
+  return out;
 }

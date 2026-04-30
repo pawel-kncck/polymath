@@ -6,6 +6,15 @@ vi.mock('@/i18n/server', () => ({
   getLocale: vi.fn().mockResolvedValue('en'),
 }));
 
+// Default to "admin" access so existing tests that don't care about per-user
+// gating keep passing. The access-control test below overrides this.
+vi.mock('@/lib/access', () => ({
+  getCurrentUserModuleAccess: vi
+    .fn()
+    .mockResolvedValue({ mode: 'all' }),
+  isModuleAccessible: vi.fn(() => true),
+}));
+
 import {
   getModules,
   getModuleById,

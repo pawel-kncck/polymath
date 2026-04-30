@@ -1,6 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { kartaRowerowa } from './karta-rowerowa';
+import { getContentModule } from '@/content';
 import type { Locale } from '@/i18n/config';
+
+// The module config is now a thin reference into the karta-rowerowa bank.
+// Read the resolved module from the loader so we see the actual items.
+const kartaRowerowa = getContentModule('karta-rowerowa')!;
 
 type LocalizedString = Partial<Record<Locale, string>>;
 type LocalizedArray = Partial<Record<Locale, string[]>>;

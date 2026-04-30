@@ -9,6 +9,8 @@ import { getLocale, getMessages } from '@/i18n/server';
 import { resolveContent, resolveLocalized } from '@/lib/localize';
 import { QuizClient } from './QuizClient';
 import { LevelPicker } from '@/components/quiz/LevelPicker';
+import { AppShell } from '@/components/shell/AppShell';
+import type { ContentCategory } from '@/content/types';
 import type { Locale } from '@/i18n/config';
 
 interface QuizPageProps {
@@ -57,8 +59,8 @@ export default async function QuizPage({
       pool[lv] = moduleMeta.items.filter((i) => i.level === lv).length;
     }
     return (
-      <div className="min-h-screen bg-gray-50 py-8 dark:bg-gray-900">
-        <div className="container mx-auto px-4">
+      <AppShell currentCategory={moduleMeta.category as ContentCategory}>
+        <div className="container mx-auto px-6 py-8">
           <div className="mb-6 text-center">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
               {title}
@@ -77,14 +79,14 @@ export default async function QuizPage({
           />
           <div className="mt-6 text-center">
             <Link
-              href="/"
+              href={`/d/${moduleMeta.category}`}
               className="text-sm text-gray-500 hover:underline dark:text-gray-400"
             >
               {t.progress.backToHome}
             </Link>
           </div>
         </div>
-      </div>
+      </AppShell>
     );
   }
 
@@ -109,8 +111,8 @@ export default async function QuizPage({
   }));
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 dark:bg-gray-900">
-      <div className="container mx-auto px-4">
+    <AppShell currentCategory={moduleMeta.category as ContentCategory}>
+      <div className="container mx-auto px-6 py-8">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
             {title}
@@ -133,6 +135,6 @@ export default async function QuizPage({
           level={requestedLevel}
         />
       </div>
-    </div>
+    </AppShell>
   );
 }

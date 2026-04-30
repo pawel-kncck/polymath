@@ -53,6 +53,15 @@ describe('results actions', () => {
           userAnswer: 'cat',
         },
       ],
+      responses: [
+        {
+          itemId: 'item1',
+          prompt: 'cat',
+          correctAnswer: 'cats',
+          userAnswer: 'cat',
+          correct: false,
+        },
+      ],
     };
 
     it('should save result with correct user ID', async () => {
@@ -81,6 +90,7 @@ describe('results actions', () => {
           total: 10,
           time: 120,
           mistakes: mockQuizResult.mistakes,
+          responses: mockQuizResult.responses,
           level: null,
         },
       });
@@ -96,6 +106,7 @@ describe('results actions', () => {
         total: 5,
         time: 90,
         mistakes: [],
+        responses: [],
         level: 2,
         createdAt: new Date(),
       };
@@ -103,7 +114,14 @@ describe('results actions', () => {
 
       await saveResult(
         'fractions-expanding',
-        { ...mockQuizResult, score: 5, total: 5, time: 90, mistakes: [] },
+        {
+          ...mockQuizResult,
+          score: 5,
+          total: 5,
+          time: 90,
+          mistakes: [],
+          responses: [],
+        },
         2
       );
 
@@ -231,24 +249,27 @@ describe('results actions', () => {
   });
 
   describe('getUserModuleProgress', () => {
-    it('aggregates attempts and keeps the best score per module', async () => {
+    it('aggregates attempts, average score and average time per module', async () => {
       vi.mocked(prisma.result.findMany).mockResolvedValue([
         {
           moduleId: 'english-plurals',
           score: 6,
           total: 10,
+          time: 60,
           createdAt: new Date('2024-01-01T10:00:00Z'),
         },
         {
           moduleId: 'english-plurals',
           score: 9,
           total: 10,
+          time: 80,
           createdAt: new Date('2024-01-02T10:00:00Z'),
         },
         {
           moduleId: 'general-knowledge',
           score: 5,
           total: 5,
+          time: 40,
           createdAt: new Date('2024-01-03T10:00:00Z'),
         },
       ] as any);
@@ -261,23 +282,22 @@ describe('results actions', () => {
           moduleId: true,
           score: true,
           total: true,
+          time: true,
           createdAt: true,
         },
       });
       expect(progress['english-plurals']).toMatchObject({
         attempts: 2,
-        bestScore: 9,
-        bestTotal: 10,
-        bestPercent: 0.9,
+        avgPercent: 0.75, // (0.6 + 0.9) / 2
+        avgTime: 70, // (60 + 80) / 2
       });
       expect(progress['english-plurals'].lastAttemptAt).toEqual(
         new Date('2024-01-02T10:00:00Z')
       );
       expect(progress['general-knowledge']).toMatchObject({
         attempts: 1,
-        bestScore: 5,
-        bestTotal: 5,
-        bestPercent: 1,
+        avgPercent: 1,
+        avgTime: 40,
       });
     });
 
@@ -293,11 +313,12 @@ describe('results actions', () => {
           moduleId: 'empty-mod',
           score: 0,
           total: 0,
+          time: 5,
           createdAt: new Date(),
         },
       ] as any);
       const progress = await getUserModuleProgress();
-      expect(progress['empty-mod'].bestPercent).toBe(0);
+      expect(progress['empty-mod'].avgPercent).toBe(0);
     });
 
     it('throws when not authenticated', async () => {

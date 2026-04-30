@@ -1,9 +1,13 @@
-import Link from 'next/link';
 import { requireAdmin } from '@/lib/auth-utils';
 import { prisma } from '@/lib/db';
 import { getLocale, getMessages } from '@/i18n/server';
+import { getAllModulesForAdmin } from '@/actions/modules';
+import { resolveLocalized } from '@/lib/localize';
+import { AppShell } from '@/components/shell/AppShell';
+import type { Locale } from '@/i18n/config';
+import type { ContentCategory } from '@/content/types';
 import { NewUserForm } from './NewUserForm';
-import { UserActions } from './UserActions';
+import { UserActions, type AccessModule } from './UserActions';
 
 export default async function AdminUsersPage() {
   const session = await requireAdmin();
@@ -17,10 +21,37 @@ export default async function AdminUsersPage() {
       email: true,
       name: true,
       role: true,
+      accessibleModuleIds: true,
       createdAt: true,
       _count: { select: { results: true } },
     },
   });
+
+  const allModules = await getAllModulesForAdmin();
+  const modulesForAccess: AccessModule[] = allModules.map((m) => ({
+    id: m.id,
+    title: resolveLocalized<string>(
+      m.title,
+      locale,
+      m.languages.filter((l) => l !== locale) as Locale[]
+    ),
+    category: m.category,
+    categoryLabel:
+      t.categories[m.category as keyof typeof t.categories] ?? m.category,
+  }));
+  // Stable category ordering so the access panel groups match the home page.
+  const CATEGORY_ORDER: ContentCategory[] = [
+    'GENERAL_KNOWLEDGE',
+    'POLISH',
+    'ENGLISH',
+    'MATH',
+    'KARTA_ROWEROWA',
+  ];
+  modulesForAccess.sort(
+    (a, b) =>
+      CATEGORY_ORDER.indexOf(a.category as ContentCategory) -
+      CATEGORY_ORDER.indexOf(b.category as ContentCategory)
+  );
 
   const dateFormatter = new Intl.DateTimeFormat(locale, {
     dateStyle: 'medium',
@@ -61,25 +92,19 @@ export default async function AdminUsersPage() {
     resetPasswordSuccessTemplate: t.admin.resetPasswordSuccess,
     errorPasswordTooShort: t.admin.errorPasswordTooShort,
     errorUnknown: t.admin.errorUnknown,
+    manageAccess: t.admin.manageAccess,
+    manageAccessTitleTemplate: t.admin.manageAccessTitle,
+    selectAll: t.admin.selectAll,
+    selectNone: t.admin.selectNone,
+    saveAccess: t.admin.saveAccess,
+    cancelAccess: t.admin.cancelAccess,
+    noModules: t.admin.noModules,
+    accessSavedTemplate: t.admin.accessSaved,
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <header className="border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-800">
-        <div className="container mx-auto flex items-center justify-between px-4 py-4">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-            {t.common.appName}
-          </h1>
-          <Link
-            href="/"
-            className="text-sm text-gray-600 hover:underline dark:text-gray-400"
-          >
-            {t.admin.backToHome}
-          </Link>
-        </div>
-      </header>
-
-      <main className="container mx-auto space-y-8 px-4 py-8">
+    <AppShell>
+      <main className="container mx-auto space-y-8 px-6 py-8">
         <div>
           <h2 className="mb-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
             {t.admin.usersTitle}
@@ -149,6 +174,9 @@ export default async function AdminUsersPage() {
                           userId={user.id}
                           email={user.email}
                           isSelf={isMe}
+                          role={user.role}
+                          accessibleModuleIds={user.accessibleModuleIds}
+                          modulesForAccess={modulesForAccess}
                           labels={rowActionLabels}
                         />
                       </td>
@@ -160,6 +188,6 @@ export default async function AdminUsersPage() {
           </div>
         )}
       </main>
-    </div>
+    </AppShell>
   );
 }

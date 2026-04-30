@@ -142,7 +142,14 @@ export function SidebarShell({
 
       <aside
         id="app-sidebar"
-        className={`fixed left-0 top-0 z-40 flex h-screen w-72 max-w-[85vw] flex-col border-r border-gray-200 bg-white px-3 py-4 transition-transform duration-200 ease-out dark:border-gray-800 dark:bg-gray-950 md:sticky md:w-64 md:max-w-none md:transition-none ${asideStateClasses}`}
+        // `h-dvh` (dynamic viewport height) tracks iOS Safari's collapsing
+        // toolbars so the bottom of the drawer isn't hidden behind the
+        // browser UI. `overflow-y-auto` keeps the contents reachable if they
+        // exceed the available height, and `pb-[env(safe-area-inset-bottom)]`
+        // adds room for the iPhone home indicator on top of the existing
+        // `py-4` padding.
+        style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}
+        className={`fixed left-0 top-0 z-40 flex h-dvh w-72 max-w-[85vw] flex-col overflow-y-auto border-r border-gray-200 bg-white px-3 py-4 transition-transform duration-200 ease-out dark:border-gray-800 dark:bg-gray-950 md:sticky md:w-64 md:max-w-none md:transition-none ${asideStateClasses}`}
       >
         {/* Close button — visible on every screen size since the user can
             now close the sidebar on desktop too. */}

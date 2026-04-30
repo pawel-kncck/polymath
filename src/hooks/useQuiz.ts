@@ -26,8 +26,23 @@ function getCorrectAnswer(item: QuizItem): string {
 }
 
 function getPrompt(item: QuizItem): string {
-  const content = item.content as { prompt?: string; instruction?: string };
-  return content.prompt || content.instruction || '';
+  // Prefer specificInstruction (numbers baked in) over genericInstruction
+  // (number-free): the history view has no visual equation alongside it, so
+  // it needs the self-contained text. Falls back to legacy `prompt` /
+  // `instruction` fields for non-fraction content types.
+  const content = item.content as {
+    prompt?: string;
+    instruction?: string;
+    genericInstruction?: string;
+    specificInstruction?: string;
+  };
+  return (
+    content.specificInstruction ||
+    content.prompt ||
+    content.instruction ||
+    content.genericInstruction ||
+    ''
+  );
 }
 
 export function useQuiz({ items, onComplete }: UseQuizOptions) {

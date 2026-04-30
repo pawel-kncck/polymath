@@ -103,11 +103,16 @@ function buildExpandItems(level: FractionLevel): ContentItem[] {
         denominator: p.denominator,
         factor: p.factor,
         answer: `${targetN}/${targetD}`,
-        // Generic instruction — the actual operation (fraction + factor) is
-        // shown in the renderer below, so repeating it here would be noise.
-        instruction: {
+        // Number-free prompt — the visual equation in the renderer carries
+        // the numbers. Used during the test.
+        genericInstruction: {
           pl: 'Rozszerz ułamek przez liczbę',
           en: 'Expand the fraction by a number',
+        },
+        // Self-contained prompt with numbers, used in the history view.
+        specificInstruction: {
+          pl: `Rozszerz ${p.numerator}/${p.denominator} przez ${p.factor}`,
+          en: `Expand ${p.numerator}/${p.denominator} by ${p.factor}`,
         },
       },
     };
@@ -145,7 +150,11 @@ function buildSimplifyItems(level: FractionLevel): ContentItem[] {
       numerator: p.presentedN,
       denominator: p.presentedD,
       answer: `${p.reducedN}/${p.reducedD}`,
-      instruction: {
+      genericInstruction: {
+        pl: 'Skróć ułamek do najprostszej postaci',
+        en: 'Simplify the fraction to its lowest terms',
+      },
+      specificInstruction: {
         pl: `Skróć ułamek ${p.presentedN}/${p.presentedD} do najprostszej postaci`,
         en: `Simplify the fraction ${p.presentedN}/${p.presentedD} to its lowest terms`,
       },
@@ -191,10 +200,14 @@ function buildReduceItems(level: FractionLevel): ContentItem[] {
       denominator: p.presentedD,
       factor: p.reduceBy,
       answer: `${p.answerN}/${p.answerD}`,
-      // Generic instruction — the actual operation is shown below.
-      instruction: {
+      // Number-free prompt — the visual equation carries the numbers.
+      genericInstruction: {
         pl: 'Skróć ułamek przez liczbę',
         en: 'Reduce the fraction by a number',
+      },
+      specificInstruction: {
+        pl: `Skróć ${p.presentedN}/${p.presentedD} przez ${p.reduceBy}`,
+        en: `Reduce ${p.presentedN}/${p.presentedD} by ${p.reduceBy}`,
       },
     },
   }));

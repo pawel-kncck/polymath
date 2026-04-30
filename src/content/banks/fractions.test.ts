@@ -96,4 +96,27 @@ describe('fractions bank', () => {
       );
     }
   });
+
+  it('every item carries both a generic and a specific instruction, with numbers only in the specific one', () => {
+    for (const item of fractionsBank.items) {
+      const c = item.content as {
+        numerator: number;
+        denominator: number;
+        genericInstruction: { pl: string; en: string };
+        specificInstruction: { pl: string; en: string };
+      };
+      expect(c.genericInstruction.pl).toBeTruthy();
+      expect(c.genericInstruction.en).toBeTruthy();
+      expect(c.specificInstruction.pl).toBeTruthy();
+      expect(c.specificInstruction.en).toBeTruthy();
+      // The generic prompt is shown alongside the visual equation, so it must
+      // not duplicate the numbers.
+      expect(c.genericInstruction.pl).not.toMatch(/\d/);
+      expect(c.genericInstruction.en).not.toMatch(/\d/);
+      // The specific prompt stands alone in the history view, so it must
+      // include the source fraction.
+      expect(c.specificInstruction.pl).toContain(`${c.numerator}/${c.denominator}`);
+      expect(c.specificInstruction.en).toContain(`${c.numerator}/${c.denominator}`);
+    }
+  });
 });

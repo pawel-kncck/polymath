@@ -47,7 +47,12 @@ export interface FractionExpandContent {
   factor: number;
   // Computed at content build time: `${numerator * factor}/${denominator * factor}`.
   answer: string;
-  instruction: string;
+  // Number-free prompt shown above the renderer (numbers appear in the visual
+  // equation below it). Used during the test.
+  genericInstruction: string;
+  // Self-contained prompt with the numbers baked in. Used in the history /
+  // results view, where there is no visual equation to reference.
+  specificInstruction: string;
 }
 
 /**
@@ -58,7 +63,8 @@ export interface FractionSimplifyContent {
   denominator: number;
   // Computed at content build time: `${reducedNumerator}/${reducedDenominator}`.
   answer: string;
-  instruction: string;
+  genericInstruction: string;
+  specificInstruction: string;
 }
 
 /**
@@ -72,5 +78,6 @@ export interface FractionReduceContent {
   factor: number;
   // Computed at content build time: `${numerator/factor}/${denominator/factor}`.
   answer: string;
-  instruction: string;
+  genericInstruction: string;
+  specificInstruction: string;
 }

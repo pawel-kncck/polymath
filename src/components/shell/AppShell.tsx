@@ -5,6 +5,7 @@ import { getAllContentModules } from '@/content';
 import { getLocale, getMessages } from '@/i18n/server';
 import { CATEGORY_ORDER, type ContentCategory } from '@/content/types';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 import { SidebarShell } from './SidebarShell';
 import { UserMenu } from './UserMenu';
 
@@ -120,8 +121,10 @@ export async function AppShell({
                 await signOut({ redirectTo: '/' });
               }}
               languageSwitcher={<LanguageSwitcher />}
+              themeSwitcher={<ThemeSwitcher />}
               labels={{
                 language: t.common.language,
+                theme: t.common.theme,
                 signOut: t.common.signOut,
                 admin: t.common.admin,
               }}

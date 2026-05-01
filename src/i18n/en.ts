@@ -9,6 +9,10 @@ export const en: Messages = {
     language: 'Language',
     languagePl: 'Polski',
     languageEn: 'English',
+    theme: 'Theme',
+    themeLight: 'Light',
+    themeDark: 'Dark',
+    themeSunrise: 'Sunrise',
   },
   signin: {
     subtitle: 'Sign in to continue learning',

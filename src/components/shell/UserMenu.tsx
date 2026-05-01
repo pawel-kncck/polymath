@@ -5,6 +5,7 @@ import Link from 'next/link';
 
 interface UserMenuLabels {
   language: string;
+  theme: string;
   signOut: string;
   admin: string;
 }
@@ -17,6 +18,7 @@ interface UserMenuProps {
   // Server-rendered LanguageSwitcher passed in as a child since UserMenu
   // itself is a client component and can't import server-only code.
   languageSwitcher: React.ReactNode;
+  themeSwitcher: React.ReactNode;
   labels: UserMenuLabels;
 }
 
@@ -34,6 +36,7 @@ export function UserMenu({
   isAdmin,
   signOutAction,
   languageSwitcher,
+  themeSwitcher,
   labels,
 }: UserMenuProps) {
   const [open, setOpen] = useState(false);
@@ -103,6 +106,10 @@ export function UserMenu({
           <div className="mb-2 flex items-center justify-between gap-2 px-1 text-xs text-gray-500 dark:text-gray-400">
             <span>{labels.language}</span>
             {languageSwitcher}
+          </div>
+          <div className="mb-2 flex items-center justify-between gap-2 px-1 text-xs text-gray-500 dark:text-gray-400">
+            <span>{labels.theme}</span>
+            {themeSwitcher}
           </div>
           {isAdmin && (
             <Link

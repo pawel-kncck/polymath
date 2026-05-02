@@ -7,6 +7,10 @@ export const pl = {
     language: 'Język',
     languagePl: 'Polski',
     languageEn: 'English',
+    theme: 'Motyw',
+    themeLight: 'Jasny',
+    themeDark: 'Ciemny',
+    themeSunrise: 'Wschód słońca',
   },
   signin: {
     subtitle: 'Zaloguj się, aby kontynuować naukę',

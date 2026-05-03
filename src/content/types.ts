@@ -7,6 +7,7 @@ export type ContentCategory =
   | 'POLISH'
   | 'ENGLISH'
   | 'MATH'
+  | 'HISTORY'
   | 'KARTA_ROWEROWA';
 export type ContentItemType =
   | 'TEXT'
@@ -23,6 +24,7 @@ export const CATEGORY_ORDER: ContentCategory[] = [
   'POLISH',
   'ENGLISH',
   'MATH',
+  'HISTORY',
   'KARTA_ROWEROWA',
 ];
 

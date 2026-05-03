@@ -37,6 +37,7 @@ export const pl = {
     POLISH: 'Język polski',
     ENGLISH: 'English language',
     MATH: 'Matematyka',
+    HISTORY: 'Historia',
     KARTA_ROWEROWA: 'Karta rowerowa',
   },
   progress: {

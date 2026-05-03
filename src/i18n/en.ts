@@ -42,6 +42,7 @@ export const en: Messages = {
     POLISH: 'Język polski',
     ENGLISH: 'English language',
     MATH: 'Math',
+    HISTORY: 'History',
     KARTA_ROWEROWA: 'Karta rowerowa',
   },
   progress: {

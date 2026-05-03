@@ -3,6 +3,7 @@ import { englishPluralsBank } from './banks/english-plurals';
 import { fractionsBank } from './banks/fractions';
 import { generalKnowledgeBank } from './banks/general-knowledge';
 import { kartaRowerowaBank } from './banks/karta-rowerowa';
+import { kosciuszkoRozbioryBank } from './banks/kosciuszko-rozbiory';
 import { sentencePartsBank } from './banks/sentence-parts';
 import { englishPlurals } from './modules/english-plurals';
 import { fractionsExpanding } from './modules/fractions-expanding';
@@ -10,6 +11,9 @@ import { fractionsReduce } from './modules/fractions-reduce';
 import { fractionsSimplifying } from './modules/fractions-simplifying';
 import { generalKnowledge } from './modules/general-knowledge';
 import { kartaRowerowa } from './modules/karta-rowerowa';
+import { kosciuszkoRozbioryAftermath } from './modules/kosciuszko-rozbiory-aftermath';
+import { kosciuszkoRozbioryCrisis } from './modules/kosciuszko-rozbiory-crisis';
+import { kosciuszkoRozbioryUprising } from './modules/kosciuszko-rozbiory-uprising';
 import { sentencePartsLevel1 } from './modules/sentence-parts-level-1';
 import { sentencePartsLevel2 } from './modules/sentence-parts-level-2';
 import { sentencePartsLevel3 } from './modules/sentence-parts-level-3';
@@ -29,6 +33,7 @@ const banks: QuestionBank[] = [
   fractionsBank,
   generalKnowledgeBank,
   kartaRowerowaBank,
+  kosciuszkoRozbioryBank,
   sentencePartsBank,
 ];
 const bankIndex = new Map(banks.map((b) => [b.id, b]));
@@ -47,6 +52,9 @@ const rawModules: ContentModule[] = [
   sentencePartsLevel8,
   englishPlurals,
   generalKnowledge,
+  kosciuszkoRozbioryCrisis,
+  kosciuszkoRozbioryUprising,
+  kosciuszkoRozbioryAftermath,
   kartaRowerowa,
   fractionsExpanding,
   fractionsSimplifying,

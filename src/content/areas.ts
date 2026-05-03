@@ -40,6 +40,14 @@ export const AREAS: ContentArea[] = [
     category: 'MATH',
   },
   {
+    id: 'kosciuszko-rozbiory',
+    title: {
+      pl: 'Powstanie kościuszkowskie i rozbiory',
+      en: 'Kościuszko Uprising and Partitions of Poland',
+    },
+    category: 'HISTORY',
+  },
+  {
     id: 'karta-rowerowa',
     title: { pl: 'Karta rowerowa' },
     category: 'KARTA_ROWEROWA',

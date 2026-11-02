@@ -32,11 +32,15 @@ export const pl = {
       'Brak modułów w wybranym języku. Przełącz język, aby zobaczyć inne moduły.',
   },
   subjects: {
+    BIOLOGY: 'Biologia',
+    GEOGRAPHY: 'Geografia',
     LANGUAGE: 'Język',
     MATH: 'Matematyka',
     LOGIC: 'Logika',
   },
   categories: {
+    BIOLOGY: 'Biologia',
+    GEOGRAPHY: 'Geografia',
     GENERAL_KNOWLEDGE: 'Wiedza ogólna',
     POLISH: 'Język polski',
     ENGLISH: 'English language',

@@ -135,6 +135,44 @@ Additional users are created from `/admin/users` (admin-only).
 
 ---
 
+## Geography: grade 5 local preview
+
+The Polish **Atlas odkrywcy** experience covers map symbols and orientation,
+scale and distances, contour lines and heights, and route planning. Four original
+lessons include interactive SVG maps, a scale ruler, a relief/contour model,
+24 questions with explanations, four badges, and up to 320 points. Source photos
+in `sources/` inspired the topic selection; their images and text are not served
+or reproduced in the lessons.
+
+```bash
+npm ci
+npm run dev:geography
+```
+
+Open http://127.0.0.1:3000/dev/geography. This preview needs no database or account.
+The launcher generates the Prisma client and supplies temporary development
+configuration without creating or changing an `.env` file. Set `PORT` to use a
+different local port. The preview route returns **404 in production**.
+
+The integrated route is `/learn/geography`, also reached through the Geography
+subject. Admins grant students the four `geo-*` modules using the existing access
+panel. Content is in Polish. Authenticated attempts are graded on the server and
+saved to the existing result history, with retry-safe attempt IDs. No database
+migration is needed.
+
+Points use each mission's best score: 10 per correct answer plus a one-time
+20-point completion award. A score of at least 5/6 earns that mission's badge.
+Preview progress stays in browser storage. Signed-in progress is initialized
+from saved account results and cached separately per user in browser storage;
+it is a learning reward, not a competitive or tamper-proof currency.
+
+```bash
+npm test -- --run src/features/geography
+# With the preview running (default port 3000):
+npx playwright install chromium
+PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000 npm run test:e2e -- e2e/geography.spec.ts
+```
+
 ## 📜 Available Scripts
 
 ### Development
@@ -288,3 +326,29 @@ npx prisma migrate dev --name <description>
 ## 📝 License
 
 This project is for personal educational use.
+
+### Biology learning experience (local)
+
+Run `npm run dev:biology`, then open <http://127.0.0.1:3000/dev/biology>.
+This development-only preview needs no account or running database and saves
+progress in this browser. If the geography preview is already running, simply
+open the biology URL on that same server. Set `PORT=3001` to use another port.
+
+The Polish grade-5 course contains five original missions inspired by the themes
+in `sources/biology/`: life and organization, scientific investigations,
+microscopy, chemical ingredients, and animal cells. Each has a short lesson,
+an interactive activity, and six questions with explanations. Activities include
+a five-level organism explorer, a controlled seed experiment, adjustable
+microscope magnification/focus, ingredient cards, and a selectable cell diagram.
+Illustrations are original SVG schematics; experiment results are explicitly
+labelled illustrative data. Reference photos are not shipped as application assets.
+
+Students can earn five badges (at least 5/6 in a mission) and 400 points total.
+Completion earns 20 points once per mission and each best correct answer earns
+10; retries only award improvements. Biology and geography progress are separate.
+The authenticated route is `/learn/biology`, with normal module access controls
+and server-graded, retry-safe result persistence. The development preview returns
+404 in production. No database schema change is required.
+
+Checks: `npx vitest run src/features/biology/` and, with the local preview running,
+`PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000 npm run test:e2e -- e2e/biology.spec.ts`.

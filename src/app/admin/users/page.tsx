@@ -46,6 +46,8 @@ export default async function AdminUsersPage() {
     'ENGLISH',
     'MATH',
     'HISTORY',
+    'GEOGRAPHY',
+    'BIOLOGY',
     'KARTA_ROWEROWA',
   ];
   modulesForAccess.sort(

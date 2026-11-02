@@ -23,3 +23,6 @@ test-results
 
 *.md
 !CLAUDE.md
+
+# Local reference photos are not application assets
+sources

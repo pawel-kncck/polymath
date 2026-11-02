@@ -33,11 +33,15 @@ export const en: Messages = {
       'No modules available in the selected language. Switch language to see other modules.',
   },
   subjects: {
+    BIOLOGY: 'Biology',
+    GEOGRAPHY: 'Geography',
     LANGUAGE: 'Language',
     MATH: 'Math',
     LOGIC: 'Logic',
   },
   categories: {
+    BIOLOGY: 'Biology',
+    GEOGRAPHY: 'Geography',
     GENERAL_KNOWLEDGE: 'General knowledge',
     POLISH: 'Język polski',
     ENGLISH: 'English language',

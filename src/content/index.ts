@@ -1,3 +1,5 @@
+import { biologyModules } from '@/features/biology/content';
+import { geographyModules } from '@/features/geography/content';
 import type { ContentItem, ContentModule } from './types';
 import { englishPluralsBank } from './banks/english-plurals';
 import { fractionsBank } from './banks/fractions';
@@ -42,6 +44,8 @@ const bankIndex = new Map(banks.map((b) => [b.id, b]));
 // loader picks them up. Order in this array becomes the display order on
 // the home page — newest-first if you want that, just unshift.
 const rawModules: ContentModule[] = [
+  ...geographyModules,
+  ...biologyModules,
   sentencePartsLevel1,
   sentencePartsLevel2,
   sentencePartsLevel3,

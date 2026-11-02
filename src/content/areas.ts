@@ -19,6 +19,8 @@ export interface ContentArea {
 }
 
 export const AREAS: ContentArea[] = [
+  { id: 'biology-foundations', title: { pl: 'Podstawy biologii', en: 'Biology foundations' }, category: 'BIOLOGY' },
+  { id: 'map-skills', title: { pl: 'Mapa i teren', en: 'Map skills' }, category: 'GEOGRAPHY' },
   {
     id: 'general-knowledge',
     title: { pl: 'Wiedza ogólna', en: 'General Knowledge' },

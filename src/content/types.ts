@@ -1,13 +1,15 @@
 import type { Locale } from '@/i18n/config';
 import type { LocalizedString } from '@/lib/localize';
 
-export type ContentSubject = 'LANGUAGE' | 'MATH' | 'LOGIC';
+export type ContentSubject = 'LANGUAGE' | 'MATH' | 'LOGIC' | 'GEOGRAPHY' | 'BIOLOGY';
 export type ContentCategory =
   | 'GENERAL_KNOWLEDGE'
   | 'POLISH'
   | 'ENGLISH'
   | 'MATH'
   | 'HISTORY'
+  | 'BIOLOGY'
+  | 'GEOGRAPHY'
   | 'KARTA_ROWEROWA';
 export type ContentItemType =
   | 'TEXT'
@@ -25,6 +27,8 @@ export const CATEGORY_ORDER: ContentCategory[] = [
   'ENGLISH',
   'MATH',
   'HISTORY',
+  'GEOGRAPHY',
+  'BIOLOGY',
   'KARTA_ROWEROWA',
 ];
 

@@ -1,0 +1,307 @@
+.bio-app {
+  --ink: #33483e;
+  --green: #456454;
+  --paper: #faf8f0;
+  --orange: #9c657c;
+  --line: #dcded0;
+  --muted: #72796e;
+}
+.bio-app .geo-missions {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 16px;
+}
+.bio-app .geo-mission-card {
+  padding: 22px 20px;
+}
+.bio-app .geo-mission-card h3 {
+  font-size: 24px;
+}
+.bio-app .geo-card-tag {
+  font-size: 9px;
+}
+.bio-app .geo-mission-card:nth-child(2) {
+  background: #f1ebdf;
+}
+.bio-app .geo-mission-card:nth-child(3) {
+  background: #e8ece8;
+}
+.bio-app .geo-mission-card:nth-child(4) {
+  background: #efe8ed;
+}
+.bio-app .geo-mission-card:nth-child(5) {
+  background: #f3e6dd;
+}
+.bio-app .geo-badges {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+.bio-app .geo-badges article {
+  padding: 25px 14px;
+}
+.bio-app .geo-hero-art > svg {
+  width: 100%;
+  height: auto;
+}
+.bio-app .geo-hero h1 {
+  font-size: clamp(38px, 4.5vw, 65px);
+}
+.bio-activity {
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: #fffdf7;
+}
+.bio-lead {
+  max-width: 780px;
+  margin-bottom: 24px !important;
+}
+.bio-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  align-items: center;
+}
+.bio-two-col > svg {
+  width: 100%;
+  height: auto;
+  min-width: 0;
+}
+.bio-two-col h3,
+.bio-finding h3 {
+  font-family: Georgia, serif;
+  font-size: 25px;
+  margin-bottom: 12px;
+}
+.bio-two-col p {
+  margin-bottom: 16px;
+}
+.bio-levels {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 9px;
+  margin-bottom: 24px;
+}
+.bio-levels button,
+.bio-parts button,
+.bio-segment button,
+.bio-chemistry button {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #f7f5eb;
+  color: var(--ink);
+  padding: 12px;
+  text-align: left;
+  transition: background 0.2s;
+}
+.bio-levels button span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+}
+.bio-app button[aria-pressed="true"] {
+  background: #e3ebdf;
+  border-color: #547357;
+  box-shadow: inset 0 0 0 1px #547357;
+}
+.bio-specimen {
+  background: #f4f1e5;
+  padding: 22px;
+  border-radius: 14px;
+  align-self: stretch;
+}
+.bio-specimen svg {
+  width: 100%;
+}
+.bio-check {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin: 10px 0;
+}
+.bio-check input {
+  accent-color: var(--green);
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.bio-seed-placeholder {
+  padding: 32px;
+  border: 1px dashed #b8bea8;
+  border-radius: 50%;
+  text-align: center;
+  color: var(--muted);
+  margin-top: 20px;
+}
+.bio-finding {
+  margin: 20px 0;
+  padding: 22px;
+  border-left: 3px solid #b19a62;
+  background: #f1f0e2;
+  border-radius: 0 12px 12px 0;
+}
+.bio-finding p {
+  margin: 8px 0 !important;
+}
+.bio-activity small {
+  color: #687367;
+}
+.bio-microscope-layout {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr 1fr;
+  gap: 25px;
+  align-items: center;
+}
+.bio-microscope-layout > svg,
+.bio-microscope-layout > div > svg {
+  width: 100%;
+  height: auto;
+}
+.bio-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.bio-controls select {
+  background: #fffdf7;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.bio-controls fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0 0 20px;
+}
+.bio-controls legend {
+  margin-bottom: 8px;
+}
+.bio-controls input {
+  accent-color: var(--green);
+  width: 100%;
+}
+.bio-segment {
+  display: flex;
+  gap: 8px;
+}
+.bio-segment button {
+  flex: 1;
+  text-align: center;
+}
+.bio-magnification {
+  display: block;
+  font-size: 48px;
+  line-height: 1.2;
+  font-family: Georgia, serif;
+  color: var(--green);
+}
+.bio-magnification small {
+  display: block;
+  font: 14px Arial;
+  margin: 9px 0 18px;
+}
+.bio-chemistry {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+}
+.bio-chemistry button {
+  text-align: center;
+  padding: 20px 10px;
+}
+.bio-chemistry button > span {
+  display: flex;
+  min-height: 75px;
+  align-items: center;
+  justify-content: center;
+  font-family: Georgia, serif;
+  font-size: 22px;
+  color: #8c607a;
+}
+.bio-parts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.bio-parts button {
+  font-size: 13px;
+}
+.bio-question-micro {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+}
+.bio-question-micro svg {
+  max-width: 220px;
+}
+.bio-question-micro p {
+  font-size: 20px;
+  line-height: 2;
+}
+.bio-level-strip {
+  padding: 30px;
+  background: #eef0e5;
+  border-radius: 15px;
+  text-align: center;
+  font-size: 18px;
+}
+@media (max-width: 1100px) {
+  .bio-app .geo-missions,
+  .bio-app .geo-badges {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .bio-chemistry {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .bio-microscope-layout {
+    grid-template-columns: 1fr 1fr;
+  }
+  .bio-microscope-layout > svg {
+    display: none;
+  }
+}
+@media (max-width: 700px) {
+  .bio-app .geo-missions,
+  .bio-app .geo-badges {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .bio-two-col,
+  .bio-microscope-layout {
+    grid-template-columns: 1fr;
+  }
+  .bio-levels {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .bio-activity {
+    padding: 16px;
+  }
+  .bio-microscope-layout > div > svg {
+    max-width: 330px;
+    display: block;
+    margin: auto;
+  }
+  .bio-chemistry {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .bio-question-micro {
+    gap: 10px;
+  }
+  .bio-question-micro svg {
+    max-width: 140px;
+  }
+  .bio-question-micro p {
+    font-size: 16px;
+  }
+}
+@media (max-width: 420px) {
+  .bio-app .geo-missions,
+  .bio-app .geo-badges {
+    grid-template-columns: 1fr;
+  }
+  .bio-app .geo-brand {
+    gap: 6px;
+  }
+  .bio-app .geo-brand small {
+    font-size: 10px;
+  }
+}

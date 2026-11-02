@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
 import { requireAuth } from '@/lib/auth-utils';
 import {
@@ -38,6 +38,8 @@ export default async function QuizPage({
 
   const moduleMeta = await getModuleById(moduleId);
   if (!moduleMeta) notFound();
+  if (moduleMeta.category === 'BIOLOGY') redirect(`/learn/biology?mission=${moduleMeta.id}&mode=quiz`);
+  if (moduleMeta.category === 'GEOGRAPHY') redirect(`/learn/geography?mission=${moduleMeta.id}&mode=quiz`);
 
   const locale = await getLocale();
   const fallbacks = moduleMeta.languages.filter(

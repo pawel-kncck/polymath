@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { requireAuth } from '@/lib/auth-utils';
 import { getModules } from '@/actions/modules';
 import {
@@ -26,6 +26,8 @@ export default async function DomainPage({ params }: DomainPageProps) {
   await requireAuth();
   const { category } = await params;
   if (!isCategory(category)) notFound();
+  if (category === 'BIOLOGY') redirect('/learn/biology');
+  if (category === 'GEOGRAPHY') redirect('/learn/geography');
 
   const t = await getMessages();
   const locale = await getLocale();

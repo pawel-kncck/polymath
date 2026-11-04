@@ -99,7 +99,7 @@ In production these are set in the Coolify dashboard, never in code.
 
 ## Deployment
 
-This app deploys to the lr15a.pl platform via Coolify (Hetzner). Pushing to `main` triggers an automatic production deploy. See `../lr15a/docs/adding-a-new-app.md` for the full platform guide.
+This app deploys to the lr15a.pl platform via Coolify (Hetzner). Pushing to `main` triggers an automatic production deploy. Read `docs/INFRASTRUCTURE.md` and `AGENTS.md` for the current infrastructure handoff and shared database boundaries. Confirm auto-deploy settings before relying on automation.
 
 ### Before every push to main
 
@@ -120,71 +120,10 @@ Run `./deploy-test.sh --build-only` (requires Docker) to verify the image builds
 - The Dockerfile overlays the full `node_modules` from the `deps` stage on top of the Next.js standalone output, because Prisma 7's CLI has too deep a dependency tree to cherry-pick.
 - Migrations run on container startup via `npx prisma migrate deploy && node server.js`.
 
-## Platform Access (lr15a — Production Debug)
+## Platform access and production database
 
-This app runs on the **lr15a** platform (Hetzner CX43, Coolify-managed). Use
-the read-only access below to debug production issues without leaving the
-codebase. Full guide and troubleshooting: see `lr15a/templates/CLAUDE-platform.md`.
-
-### Identity
-
-| | |
-|---|---|
-| **App name (use with `app-*` commands)** | `polymath` |
-| **Public URL** | https://polymath.lr15a.pl |
-| **Database** | `polymath_db` on shared Postgres 17 (container `tmapstq47cradeaqx7dbxxly`) |
-| **App user** | `polymath_user` (least-priv, set via Coolify `DATABASE_URL`) |
-| **Read-only role for agents** | `polymath_readonly` (SELECT only on `public` schema) |
-| **ORM** | Prisma 7 — migrations in `prisma/migrations/`, applied via `prisma migrate deploy` at startup; tracking table is `public._prisma_migrations` |
-
-### Fast debug commands
-
-> **Concrete values (server host, SSH user, readonly DB URL) are NOT in this
-> public repo.** They live in Claude's local memory at `agent_access.md` and
-> `db_readonly_credentials.md` (under `~/.claude/projects/.../memory/`). The
-> agent should look them up there and either export the env vars below for
-> the session, or substitute inline.
-
-```bash
-# Set once per shell — values come from Claude memory `agent_access.md`:
-#   export LR15A_SSH='ssh -i ~/.ssh/claude_lr15a <user>@<host>'
-#   export POLYMATH_RO_URL='postgresql://polymath_readonly:...@<vpn-host>:5432/polymath_db'
-
-# "Is my last push deployed and running?"
-$LR15A_SSH app-status polymath
-
-# "What's the latest error in production?"
-$LR15A_SSH app-logs polymath --tail 500
-$LR15A_SSH app-logs polymath --since 1h --timestamps
-
-# "Did my migration run on prod?"
-psql "$POLYMATH_RO_URL" -c "SELECT migration_name, finished_at FROM _prisma_migrations ORDER BY finished_at DESC LIMIT 5;"
-
-# "How many users / sessions / results do we have?"
-psql "$POLYMATH_RO_URL" -c "SELECT count(*) FROM \"User\";"
-psql "$POLYMATH_RO_URL" -c "SELECT count(*) FROM \"Session\";"
-psql "$POLYMATH_RO_URL" -c "SELECT count(*) FROM \"Result\";"
-
-# "What's the DB size? Active connections?"
-$LR15A_SSH pg-databases
-$LR15A_SSH pg-connections
-```
-
-DB access **requires WireGuard active on the agent's machine** (the Postgres
-port is firewalled to the VPN subnet). If `psql` hangs, run `wg show` to
-verify VPN is up. If `agent_access.md` isn't in Claude memory yet, the agent
-hasn't been bootstrapped — see `lr15a/docs/agent-access-setup.md` (private repo).
-
-Note: Prisma uses Pascal-case quoted table names (`"User"`, `"Module"`,
-`"Result"`, `"Account"`, `"Session"`, `"VerificationToken"`) — quote them in
-SQL.
-
-### Constraints
-
-- Agent has **no write access** to production. Schema changes happen only via
-  Prisma migrations in this repo, applied by the app on deploy.
-- Container names change on every Coolify redeploy — always use `app-logs polymath` /
-  `app-status polymath`, not raw container IDs.
-- For deploy/build logs older than the current container, query the Coolify API
-  (`/applications/{uuid}/logs`); the agent SSH wrapper only sees the running
-  container.
+Read [docs/INFRASTRUCTURE.md](docs/INFRASTRUCTURE.md) before production work.
+Use the local sibling `../infra-lr15a` operating repository for access and dated
+findings, shared by both agents. Do not rely on Claude private memory for access
+instructions. Credentials may allow more than a task needs; production write authority
+comes from the current user request, not credential capability.

@@ -2,6 +2,14 @@
 
 Use this checklist before pushing to `main` (every push to `main` is a production deploy via Coolify).
 
+## Existing production app
+
+- [ ] Read `docs/INFRASTRUCTURE.md`; confirm the existing app UUID and database
+- [ ] Check for ongoing deployments and confirm the actual auto-deploy settings
+- [ ] Verify a recoverable backup of `polymath_db` and restoration steps
+- [ ] Record current commit/image digest and rollback plan; review migration effects
+- [ ] Preserve the shared PostgreSQL service, volume, and other apps' databases
+
 ## Local environment
 
 - [ ] `.env` populated from `.env.example` with real values
@@ -46,7 +54,12 @@ Use this checklist before pushing to `main` (every push to `main` is a productio
 - [ ] English Plurals module loads, progresses, and saves a Result
 - [ ] Mistakes appear in the results screen
 
-## Coolify-side (first deploy only)
+## Historical first-deploy checklist
+
+Polymath is already provisioned. Do not repeat these steps for routine updates.
+Any new provisioning or production seed run requires explicit task scope.
+
+### Coolify-side (first deploy only)
 
 - [ ] App created in Coolify, linked to GitHub repo, Build Pack = Docker
 - [ ] Domain `polymath.lr15a.pl` set, SSL issued

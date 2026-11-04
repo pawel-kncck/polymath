@@ -1,5 +1,5 @@
 # Next.js + Prisma 7 Dockerfile for the lr15a.pl Coolify platform.
-# See ../lr15a/docs/deployment-lessons.md for the reasoning behind each choice.
+# See docs/INFRASTRUCTURE.md and CLAUDE.md for deployment guidance.
 #
 # Prerequisites:
 #   - next.config: output: "standalone"

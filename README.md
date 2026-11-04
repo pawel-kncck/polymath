@@ -256,13 +256,13 @@ This app deploys to the lr15a.pl platform via Coolify (Hetzner). Pushing to `mai
 
 See [`CLAUDE.md`](./CLAUDE.md) for the deployment rules and [`DEPLOYMENT_CHECKLIST.md`](./DEPLOYMENT_CHECKLIST.md) for the pre-push checklist.
 
-### Quick reference
+### Existing production app
 
-1. Create the database on the server: `./server/create-app-db.sh polymath <postgres-container>`
-2. Add the app in the Coolify dashboard, Build Pack = Docker, domain = `polymath.lr15a.pl`
-3. Set env vars in Coolify: `DATABASE_URL`, `AUTH_URL`, `AUTH_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`
-4. Deploy — startup runs `prisma migrate deploy` automatically
-5. First time only: run `npm run db:seed` via Coolify exec to create the admin user
+Read [the infrastructure handoff](docs/INFRASTRUCTURE.md) for shared
+database boundaries and deployment checks.
+Polymath is already provisioned: maintain its existing Coolify application and
+`polymath_db`; do not recreate the shared PostgreSQL service. Infrastructure
+operations and findings belong in the sibling `../infra-lr15a` checkout.
 
 ---
 

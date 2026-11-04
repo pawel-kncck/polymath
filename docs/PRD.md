@@ -170,7 +170,10 @@ To ensure the app "scales" to new subjects, we define strict JSON structures for
 > Coolify with email/password auth. See `CLAUDE.md` and the lr15a platform
 > docs for the current setup.
 
-### Phase 1: Setup
+### Phase 1: Setup (historical; already completed)
+
+Current operations: [infrastructure handoff](INFRASTRUCTURE.md). Do not rerun
+these original provisioning steps against the existing production deployment.
 
 1.  **Repo:** Create `polymath` on GitHub.
 2.  **Database:** `ssh` to the lr15a server and run `./server/create-app-db.sh polymath <postgres-container>` to provision an isolated DB + user.
